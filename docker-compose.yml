@@ -1,0 +1,61 @@
+name: ai-observability-poc
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector:0.95.0
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./otel-collector/config.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC  (app -> collector)
+      - "4318:4318"   # OTLP HTTP
+      - "8889:8889"   # Prometheus exporter (Prometheus scrapes this)
+      - "8888:8888"   # Collector self-metrics (accepted/sent/failed spans)
+    depends_on:
+      - tempo
+    restart: unless-stopped
+
+  tempo:
+    image: grafana/tempo:2.4.1
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo.yaml:ro
+      - tempo-data:/var/tempo
+    ports:
+      - "3200:3200"   # Tempo HTTP API / Grafana datasource (OTLP ingest is internal, via collector)
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-remote-write-receiver"
+      - "--enable-feature=exemplar-storage"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9091:9090"   # host 9090 is taken by mihomo; container port unchanged
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:13.0.1
+    depends_on:
+      - tempo
+      - prometheus
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+      GF_AUTH_DISABLE_LOGIN_FORM: "false"
+      GF_FEATURE_TOGGLES_ENABLE: "traceqlEditor tracesEmbeddedFlameGraph"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+volumes:
+  tempo-data:
+  prometheus-data:

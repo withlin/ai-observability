@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 10s
+  evaluation_interval: 10s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Native OTLP metrics exported by the collector's prometheus exporter
+  # (token usage, cost, operation duration, service metrics...).
+  - job_name: otel-collector
+    static_configs:
+      - targets: ["otel-collector:8889"]
+
+  # Collector self-observability: accepted/sent/failed spans and queue depth.
+  - job_name: otel-collector-internal
+    static_configs:
+      - targets: ["otel-collector:8888"]
+
+  # Tempo's own internal metrics (ingester/querier/generator health).
+  - job_name: tempo
+    static_configs:
+      - targets: ["tempo:3200"]

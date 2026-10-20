@@ -1,0 +1,1958 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Token & Cost. Cost is derived query-side from cumulative token counters times the deployment price table (USD per 1M tokens: gemini-3.8-flash 0.3/2.5, gpt-4o 2.5/10, kimi-k3 3/15). It is not a telemetry metric; update the inline price vectors when models or prices change. Unknown models contribute zero cost.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "liveNow": false,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Agent Insight",
+      "tooltip": "Open the Agent Insight overview",
+      "type": "link",
+      "url": "/d/agent-insight/"
+    }
+  ],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 10,
+      "title": "Cost overview",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Estimated USD spend in the window (local pricing table). Arrow compares with the immediately preceding window of the same length.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 4,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#10B981",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "id": 11,
+      "maxDataPoints": 80,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "text": {
+          "percentSize": 24,
+          "titleSize": 0,
+          "valueSize": 38
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(sum((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6))) > 0",
+          "format": null,
+          "interval": "10s",
+          "legendFormat": "now",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Cost",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Average spend per hour across the window (burn rate).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 4,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#EA580C",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
+      "id": 12,
+      "maxDataPoints": 80,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "text": {
+          "percentSize": 24,
+          "titleSize": 0,
+          "valueSize": 38
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(sum((sum by (gen_ai_request_model)(rate(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(rate(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6)) * 3600) > 0",
+          "format": null,
+          "interval": "10s",
+          "legendFormat": "now",
+          "refId": "A"
+        }
+      ],
+      "title": "Cost / Hour",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Current run rate extrapolated over 30 days - a budgeting signal, not a bill.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#DC2626",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "id": 13,
+      "maxDataPoints": 80,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "text": {
+          "percentSize": 24,
+          "titleSize": 0,
+          "valueSize": 38
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(sum((sum by (gen_ai_request_model)(rate(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(rate(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6)) * 2592000) > 0",
+          "format": null,
+          "interval": "10s",
+          "legendFormat": "now",
+          "refId": "A"
+        }
+      ],
+      "title": "Projected / Month",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Total cost divided by the number of chat requests - unit economics.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 6,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#7C3AED",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "id": 14,
+      "maxDataPoints": 80,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "text": {
+          "percentSize": 24,
+          "titleSize": 0,
+          "valueSize": 38
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(sum((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6))) / clamp_min(sum(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\", gen_ai_operation_name=\"chat\"}[$__range])), 0.0001)",
+          "format": null,
+          "interval": "10s",
+          "legendFormat": "now",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg Cost / Request",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Input + output tokens in the window.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#2563EB",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "id": 15,
+      "maxDataPoints": 80,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "text": {
+          "percentSize": 24,
+          "titleSize": 0,
+          "valueSize": 38
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "((sum(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range]))) + (sum(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])))) > 0",
+          "format": null,
+          "interval": "10s",
+          "legendFormat": "now",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Tokens",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Blended price per 1K tokens - the higher this is, the more expensive the traffic mix.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 4,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#0D9488",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        }
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "id": 16,
+      "maxDataPoints": 80,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "text": {
+          "percentSize": 24,
+          "titleSize": 0,
+          "valueSize": 38
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(sum((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6))) / clamp_min((sum(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) + sum(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range]))) / 1000, 0.0001)",
+          "format": null,
+          "interval": "10s",
+          "legendFormat": "now",
+          "refId": "A"
+        }
+      ],
+      "title": "Cost / 1K Tokens",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "id": 20,
+      "title": "Spend over time",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "USD spent per time bucket, stacked by model - shows which model drives spend.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 30,
+            "gradientMode": "opacity",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            }
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 8
+      },
+      "id": 21,
+      "maxDataPoints": 2000,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (model)(label_replace((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\"))",
+          "legendFormat": "{{model}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Cost over time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Instantaneous burn rate in USD per hour.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 30,
+            "gradientMode": "opacity",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cost / hour"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#EA580C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 8
+      },
+      "id": 22,
+      "maxDataPoints": 2000,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum((sum by (gen_ai_request_model)(rate(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(rate(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6)) * 3600",
+          "legendFormat": "Cost / hour",
+          "refId": "A"
+        }
+      ],
+      "title": "Cost rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Average USD cost per chat request - efficiency trend.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 30,
+            "gradientMode": "opacity",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cost / request"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7C3AED",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 8
+      },
+      "id": 23,
+      "maxDataPoints": 2000,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(sum((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6))) / clamp_min(sum(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\", gen_ai_operation_name=\"chat\"}[$__rate_interval])), 0.0001)",
+          "legendFormat": "Cost / request",
+          "refId": "A"
+        }
+      ],
+      "title": "Cost per request",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 30,
+      "title": "Usage & efficiency",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Input and output tokens per bucket, stacked. Output tokens usually cost several times more than input, so the split matters for spend.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 30,
+            "gradientMode": "opacity",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Input tokens"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#DB2777",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Output tokens"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#F59E0B",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 17
+      },
+      "id": 31,
+      "maxDataPoints": 2000,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval]))",
+          "legendFormat": "Input tokens",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval]))",
+          "legendFormat": "Output tokens",
+          "refId": "B"
+        }
+      ],
+      "title": "Token usage over time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Blended USD price per 1K tokens - rises when pricier models or output-heavy traffic dominate.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 30,
+            "gradientMode": "opacity",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            }
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cost / 1K tokens"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#0D9488",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 17
+      },
+      "id": 32,
+      "maxDataPoints": 2000,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(sum((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6))) / clamp_min((sum(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) + sum(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval]))) / 1000, 0.0001)",
+          "legendFormat": "Cost / 1K tokens",
+          "refId": "A"
+        }
+      ],
+      "title": "Cost per 1K tokens",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 25
+      },
+      "id": 40,
+      "title": "Cost by model",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Share of total spend per model - the fastest read on what is driving the bill.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "currencyUSD",
+          "decimals": 4
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 26
+      },
+      "id": 41,
+      "options": {
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "pieType": "donut",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (model)(label_replace((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\"))",
+          "refId": "A"
+        }
+      ],
+      "title": "Cost share by model",
+      "type": "piechart",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "\\{(\\w+)=\"(.+)\"\\}",
+            "renamePattern": "$2"
+          }
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "One row per model; every metric is a gradient gauge over a 6-stop rainbow scale. Footer shows column totals.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "model"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Model"
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value #A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Requests"
+              },
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 600
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#22D3EE"
+                    },
+                    {
+                      "color": "#34D399",
+                      "value": 120.0
+                    },
+                    {
+                      "color": "#FBBF24",
+                      "value": 240.0
+                    },
+                    {
+                      "color": "#F97316",
+                      "value": 360.0
+                    },
+                    {
+                      "color": "#F43F5E",
+                      "value": 480.0
+                    },
+                    {
+                      "color": "#E879F9",
+                      "value": 600.0
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value #B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Tokens"
+              },
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 100000
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#22D3EE"
+                    },
+                    {
+                      "color": "#34D399",
+                      "value": 20000.0
+                    },
+                    {
+                      "color": "#FBBF24",
+                      "value": 40000.0
+                    },
+                    {
+                      "color": "#F97316",
+                      "value": 60000.0
+                    },
+                    {
+                      "color": "#F43F5E",
+                      "value": 80000.0
+                    },
+                    {
+                      "color": "#E879F9",
+                      "value": 100000.0
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value #C"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Cost (USD)"
+              },
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 0.2
+              },
+              {
+                "id": "decimals",
+                "value": 4
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#22D3EE"
+                    },
+                    {
+                      "color": "#34D399",
+                      "value": 0.04
+                    },
+                    {
+                      "color": "#FBBF24",
+                      "value": 0.08
+                    },
+                    {
+                      "color": "#F97316",
+                      "value": 0.12
+                    },
+                    {
+                      "color": "#F43F5E",
+                      "value": 0.16
+                    },
+                    {
+                      "color": "#E879F9",
+                      "value": 0.2
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value #D"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Cost / 1K tokens"
+              },
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 0.02
+              },
+              {
+                "id": "decimals",
+                "value": 4
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#22D3EE"
+                    },
+                    {
+                      "color": "#34D399",
+                      "value": 0.004
+                    },
+                    {
+                      "color": "#FBBF24",
+                      "value": 0.008
+                    },
+                    {
+                      "color": "#F97316",
+                      "value": 0.012
+                    },
+                    {
+                      "color": "#F43F5E",
+                      "value": 0.016
+                    },
+                    {
+                      "color": "#E879F9",
+                      "value": 0.02
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 16,
+        "x": 8,
+        "y": 26
+      },
+      "id": 42,
+      "options": {
+        "footer": {
+          "fields": "Value #A, Value #B, Value #C",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (model)(label_replace(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\", gen_ai_operation_name=\"chat\"}[$__range]), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\"))",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(sum by (model)(label_replace(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range]), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\"))) + (sum by (model)(label_replace(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range]), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\")))",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (model)(label_replace((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\"))",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(sum by (model)(label_replace((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\"))) / clamp_min((sum by (model)(label_replace(sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) + sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\"))) / 1000, 0.0001)",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "D"
+        }
+      ],
+      "title": "Model cost breakdown",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "model",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "model",
+                "Value #A",
+                "Value #B",
+                "Value #C",
+                "Value #D"
+              ]
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      },
+      "id": 50,
+      "title": "Cost by agent",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "One row per agent; every metric is a gradient gauge over a 6-stop rainbow scale. Footer shows column totals.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "agent"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Agent"
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value #A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Requests"
+              },
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 600
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#22D3EE"
+                    },
+                    {
+                      "color": "#34D399",
+                      "value": 120.0
+                    },
+                    {
+                      "color": "#FBBF24",
+                      "value": 240.0
+                    },
+                    {
+                      "color": "#F97316",
+                      "value": 360.0
+                    },
+                    {
+                      "color": "#F43F5E",
+                      "value": 480.0
+                    },
+                    {
+                      "color": "#E879F9",
+                      "value": 600.0
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value #B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Tokens"
+              },
+              {
+                "id": "unit",
+                "value": "short"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 100000
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#22D3EE"
+                    },
+                    {
+                      "color": "#34D399",
+                      "value": 20000.0
+                    },
+                    {
+                      "color": "#FBBF24",
+                      "value": 40000.0
+                    },
+                    {
+                      "color": "#F97316",
+                      "value": 60000.0
+                    },
+                    {
+                      "color": "#F43F5E",
+                      "value": 80000.0
+                    },
+                    {
+                      "color": "#E879F9",
+                      "value": 100000.0
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value #C"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Cost (USD)"
+              },
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 0.2
+              },
+              {
+                "id": "decimals",
+                "value": 4
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#22D3EE"
+                    },
+                    {
+                      "color": "#34D399",
+                      "value": 0.04
+                    },
+                    {
+                      "color": "#FBBF24",
+                      "value": 0.08
+                    },
+                    {
+                      "color": "#F97316",
+                      "value": 0.12
+                    },
+                    {
+                      "color": "#F43F5E",
+                      "value": 0.16
+                    },
+                    {
+                      "color": "#E879F9",
+                      "value": 0.2
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value #D"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Cost / 1K tokens"
+              },
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "max",
+                "value": 0.02
+              },
+              {
+                "id": "decimals",
+                "value": 4
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#22D3EE"
+                    },
+                    {
+                      "color": "#34D399",
+                      "value": 0.004
+                    },
+                    {
+                      "color": "#FBBF24",
+                      "value": 0.008
+                    },
+                    {
+                      "color": "#F97316",
+                      "value": 0.012
+                    },
+                    {
+                      "color": "#F43F5E",
+                      "value": 0.016
+                    },
+                    {
+                      "color": "#E879F9",
+                      "value": 0.02
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "id": 51,
+      "options": {
+        "footer": {
+          "fields": "Value #A, Value #B, Value #C",
+          "reducer": [
+            "sum"
+          ],
+          "show": true
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (agent)(label_replace(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\", gen_ai_operation_name=\"chat\"}[$__range]), \"agent\", \"$1\", \"gen_ai_agent_name\", \"(.+)\"))",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(sum by (agent)(label_replace(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range]), \"agent\", \"$1\", \"gen_ai_agent_name\", \"(.+)\"))) + (sum by (agent)(label_replace(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range]), \"agent\", \"$1\", \"gen_ai_agent_name\", \"(.+)\")))",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (agent)(label_replace((sum by (gen_ai_request_model, gen_ai_agent_name)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model, gen_ai_agent_name)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6), \"agent\", \"$1\", \"gen_ai_agent_name\", \"(.+)\"))",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(sum by (agent)(label_replace((sum by (gen_ai_request_model, gen_ai_agent_name)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model, gen_ai_agent_name)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6), \"agent\", \"$1\", \"gen_ai_agent_name\", \"(.+)\"))) / clamp_min((sum by (agent)(label_replace(sum by (gen_ai_request_model, gen_ai_agent_name)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) + sum by (gen_ai_request_model, gen_ai_agent_name)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])), \"agent\", \"$1\", \"gen_ai_agent_name\", \"(.+)\"))) / 1000, 0.0001)",
+          "format": "table",
+          "instant": true,
+          "range": false,
+          "refId": "D"
+        }
+      ],
+      "title": "Agent cost breakdown",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "agent",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "agent",
+                "Value #A",
+                "Value #B",
+                "Value #C",
+                "Value #D"
+              ]
+            }
+          }
+        }
+      ],
+      "type": "table"
+    }
+  ],
+  "preload": false,
+  "refresh": "10s",
+  "schemaVersion": 42,
+  "tags": [
+    "agentloop",
+    "genai",
+    "token",
+    "cost",
+    "langgraph"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": ".*",
+        "allowCustomValue": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "hide": 0,
+        "includeAll": true,
+        "label": "Application",
+        "multi": true,
+        "name": "application",
+        "options": [],
+        "query": {
+          "query": "label_values(traces_spanmetrics_calls_total, service)",
+          "refId": "A"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "allowCustomValue": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "hide": 0,
+        "includeAll": true,
+        "label": "Agent",
+        "multi": true,
+        "name": "agent",
+        "options": [],
+        "query": {
+          "query": "label_values(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_agent_name!=\"\"}, gen_ai_agent_name)",
+          "refId": "A"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "allowCustomValue": true,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "hide": 0,
+        "includeAll": true,
+        "label": "Model",
+        "multi": true,
+        "name": "model",
+        "options": [],
+        "query": {
+          "query": "label_values(gen_ai_client_inference_duration_seconds_count{gen_ai_agent_name=~\"$agent\"}, gen_ai_request_model)",
+          "refId": "A"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-3h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Token & Cost",
+  "uid": "token-cost"
+}

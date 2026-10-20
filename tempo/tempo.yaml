@@ -1,0 +1,70 @@
+stream_over_http_enabled: true
+
+server:
+  http_listen_port: 3200
+  log_level: warn
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+ingester:
+  trace_idle_period: 10s
+  max_block_bytes: 1048576
+  max_block_duration: 5m
+
+compactor:
+  compaction:
+    block_retention: 24h
+
+storage:
+  trace:
+    backend: local
+    local:
+      path: /var/tempo/traces
+    wal:
+      path: /var/tempo/wal
+
+# Derive RED metrics from traces (the "second data plane").
+# `dimensions` promotes bounded gen_ai.* attributes into Prometheus labels.
+# Conversation and user ids stay in traces: they are unbounded identifiers and
+# must never become metric dimensions (standard R-11.1-01).
+metrics_generator:
+  registry:
+    external_labels:
+      source: tempo
+      cluster: local
+  storage:
+    path: /var/tempo/generator/wal
+    remote_write:
+      - url: http://prometheus:9090/api/v1/write
+        send_exemplars: true
+  processor:
+    service_graphs:
+      dimensions: [gen_ai.agent.name]
+    span_metrics:
+      dimensions:
+        - gen_ai.operation.name
+        - gen_ai.request.model
+        - gen_ai.provider.name
+        - gen_ai.tool.name
+        - gen_ai.agent.name
+        - gen_ai.workflow.name
+        - gen_ai.skill.name
+        - gen_ai.skill.resource.name
+        - gen_ai.data_source.id
+        - gen_ai.memory.store.id
+        - error.type
+
+overrides:
+  defaults:
+    metrics_generator:
+      processors: [service-graphs, span-metrics]
+
+usage_report:
+  reporting_enabled: false
