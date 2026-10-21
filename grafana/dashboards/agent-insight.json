@@ -1055,6 +1055,63 @@
               {
                 "id": "custom.align",
                 "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "gemini-3.8-flash": {
+                        "color": "#22D3EE",
+                        "index": 0
+                      },
+                      "gpt-4o": {
+                        "color": "#34D399",
+                        "index": 1
+                      },
+                      "gpt-5.3-codex": {
+                        "color": "#A78BFA",
+                        "index": 2
+                      },
+                      "gpt-5.6-luna": {
+                        "color": "#F472B6",
+                        "index": 3
+                      },
+                      "gpt-5.6-terra": {
+                        "color": "#FBBF24",
+                        "index": 4
+                      },
+                      "gpt-6-luna": {
+                        "color": "#FB923C",
+                        "index": 5
+                      },
+                      "grok-4.6": {
+                        "color": "#60A5FA",
+                        "index": 6
+                      },
+                      "grok-4.7": {
+                        "color": "#2DD4BF",
+                        "index": 7
+                      },
+                      "kimi-k3": {
+                        "color": "#C084FC",
+                        "index": 8
+                      },
+                      "mai-code-1.1-flash": {
+                        "color": "#4ADE80",
+                        "index": 9
+                      }
+                    }
+                  }
+                ]
               }
             ]
           },
@@ -1187,6 +1244,35 @@
               {
                 "id": "unit",
                 "value": "ns"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#CBD5E1",
+                      "value": null
+                    },
+                    {
+                      "color": "#F2495C",
+                      "value": 30000000000
+                    }
+                  ]
+                }
               }
             ]
           },
@@ -1857,7 +1943,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "max by (id, title, subtitle, color)(label_replace(label_replace(label_replace(label_replace(((histogram_quantile(0.95, sum by (le, gen_ai_agent_name)(increase(gen_ai_invoke_agent_duration_seconds_bucket{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"\"}[$__range])))) >= 0), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace(((histogram_quantile(0.95, sum by (le, gen_ai_request_model)(increase(gen_ai_client_inference_duration_seconds_bucket{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\"}[$__range])))) >= 0), \"id\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_request_model\", \"(.*)\"), \"subtitle\", \"Model\", \"gen_ai_request_model\", \".*\"), \"color\", \"#0D9488\", \"gen_ai_request_model\", \".*\") or label_replace(label_replace(label_replace(label_replace(((histogram_quantile(0.95, sum by (le, gen_ai_agent_name)(increase(gen_ai_client_inference_duration_seconds_bucket{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"}[$__range])))) >= 0), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"\"})), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(increase(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"\"}[$__range]))), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"})), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"}[$__range]))), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_request_model)(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\"})), \"id\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_request_model\", \"(.*)\"), \"subtitle\", \"Model\", \"gen_ai_request_model\", \".*\"), \"color\", \"#0D9488\", \"gen_ai_request_model\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_request_model)(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\"}[$__range]))), \"id\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_request_model\", \"(.*)\"), \"subtitle\", \"Model\", \"gen_ai_request_model\", \".*\"), \"color\", \"#0D9488\", \"gen_ai_request_model\", \".*\") or label_replace(label_replace(label_replace(label_replace(vector(0), \"id\", \"agent:supervisor_agent\", \"\", \"\"), \"title\", \"supervisor_agent\", \"\", \"\"), \"subtitle\", \"Agent\", \"\", \"\"), \"color\", \"#7C3AED\", \"\", \"\"))",
+          "expr": "((max by (id, title, subtitle, color)(label_replace(label_replace(label_replace(label_replace(((histogram_quantile(0.95, sum by (le, gen_ai_agent_name)(increase(gen_ai_invoke_agent_duration_seconds_bucket{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"\"}[$__range])))) >= 0), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace(((histogram_quantile(0.95, sum by (le, gen_ai_request_model)(increase(gen_ai_client_inference_duration_seconds_bucket{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\"}[$__range])))) >= 0), \"id\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_request_model\", \"(.*)\"), \"subtitle\", \"Model\", \"gen_ai_request_model\", \".*\"), \"color\", \"#0D9488\", \"gen_ai_request_model\", \".*\") or label_replace(label_replace(label_replace(label_replace(((histogram_quantile(0.95, sum by (le, gen_ai_agent_name)(increase(gen_ai_client_inference_duration_seconds_bucket{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"}[$__range])))) >= 0), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"\"})), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(increase(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"\"}[$__range]))), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"})), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"}[$__range]))), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_request_model)(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\"})), \"id\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_request_model\", \"(.*)\"), \"subtitle\", \"Model\", \"gen_ai_request_model\", \".*\"), \"color\", \"#0D9488\", \"gen_ai_request_model\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_request_model)(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\"}[$__range]))), \"id\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_request_model\", \"(.*)\"), \"subtitle\", \"Model\", \"gen_ai_request_model\", \".*\"), \"color\", \"#0D9488\", \"gen_ai_request_model\", \".*\") or label_replace(label_replace(label_replace(label_replace(vector(0), \"id\", \"agent:supervisor_agent\", \"\", \"\"), \"title\", \"supervisor_agent\", \"\", \"\"), \"subtitle\", \"Agent\", \"\", \"\"), \"color\", \"#7C3AED\", \"\", \"\"))) unless on(id) (((sum by (id)(label_replace((sum by (gen_ai_agent_name)(increase(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"\", error_type!=\"\"}[$__range])) > 0), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"))) or (sum by (id)(label_replace((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\", error_type!=\"\"}[$__range])) > 0), \"id\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\")))))) or label_replace(((max by (id, title, subtitle, color)(label_replace(label_replace(label_replace(label_replace(((histogram_quantile(0.95, sum by (le, gen_ai_agent_name)(increase(gen_ai_invoke_agent_duration_seconds_bucket{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"\"}[$__range])))) >= 0), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace(((histogram_quantile(0.95, sum by (le, gen_ai_request_model)(increase(gen_ai_client_inference_duration_seconds_bucket{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\"}[$__range])))) >= 0), \"id\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_request_model\", \"(.*)\"), \"subtitle\", \"Model\", \"gen_ai_request_model\", \".*\"), \"color\", \"#0D9488\", \"gen_ai_request_model\", \".*\") or label_replace(label_replace(label_replace(label_replace(((histogram_quantile(0.95, sum by (le, gen_ai_agent_name)(increase(gen_ai_client_inference_duration_seconds_bucket{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"}[$__range])))) >= 0), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"\"})), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(increase(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"\"}[$__range]))), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"})), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"}[$__range]))), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_request_model)(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\"})), \"id\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_request_model\", \"(.*)\"), \"subtitle\", \"Model\", \"gen_ai_request_model\", \".*\"), \"color\", \"#0D9488\", \"gen_ai_request_model\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_request_model)(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\"}[$__range]))), \"id\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_request_model\", \"(.*)\"), \"subtitle\", \"Model\", \"gen_ai_request_model\", \".*\"), \"color\", \"#0D9488\", \"gen_ai_request_model\", \".*\") or label_replace(label_replace(label_replace(label_replace(vector(0), \"id\", \"agent:supervisor_agent\", \"\", \"\"), \"title\", \"supervisor_agent\", \"\", \"\"), \"subtitle\", \"Agent\", \"\", \"\"), \"color\", \"#7C3AED\", \"\", \"\"))) and on(id) (((sum by (id)(label_replace((sum by (gen_ai_agent_name)(increase(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"\", error_type!=\"\"}[$__range])) > 0), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"))) or (sum by (id)(label_replace((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\", error_type!=\"\"}[$__range])) > 0), \"id\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\")))))), \"color\", \"#F2495C\", \"id\", \".*\")",
           "instant": true,
           "range": false,
           "format": "table",
