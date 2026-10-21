@@ -59,22 +59,35 @@ memory service, and graph. Tests construct it with in-memory exporters.
 |-----|-------|------|---------|
 | `agent-insight` | Agent Insight | `agent-insight.json` | Errors (by operation, type, and bounded source), the trace-derived Conversations card, Run volume, the Trajectory table, the Percentiles row (p95/p99), and the Scenarios row (skill tools, retrieval, memory). |
 | `token-cost` | Token & Cost | `token-cost.json` | Cost KPIs, spend trends, and cost by model / agent. Cost is derived in the dashboard from tokens × prices; there is no cost metric. |
+| `ai-adoption` | AI Adoption | `ai-adoption.json` | Executive adoption view: applications, agents, models, consumption, growth, health, and a per-application leaderboard with drilldowns. |
 
-Both dashboards share the `application` → `agent` → `model` cascade.
+All three dashboards share the `application` → `agent` → `model` cascade.
 
 ### Importing into another Grafana
 
-Both dashboards declare datasource inputs. Import a JSON via
+All three dashboards declare datasource inputs. Import a JSON via
 **Dashboards → New → Import** and select the data sources:
 
 | Dashboard | Inputs |
 |---|---|
 | `agent-insight.json` | Prometheus (metrics) and Tempo (tracing) |
 | `token-cost.json` | Prometheus (metrics) |
+| `ai-adoption.json` | Prometheus (metrics) |
 
 Panels and query variables bind to the selected UIDs. The inputs are hidden
 template variables, so they add no controls to the dashboard. When provisioned
 by this repository they default to the local `prometheus` and `tempo` UIDs.
+
+### Adoption overview
+
+`ai-adoption.json` is the executive adoption view. Applications are counted from
+standard telemetry, not an onboarding registry: the value is the number of
+services that emitted GenAI metrics in the window. New applications compares the
+window with the preceding window of the same length. Agents and models are
+distinct standard metric label values. The environment filter defaults to `prod`;
+use `All` or `local` for the local demo. Estimated cost uses the same flat
+placeholder rates as `token-cost`. The application leaderboard links to Agent
+Insight and Token & Cost for each application.
 
 ### Conversations and users are trace-only
 
