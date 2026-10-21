@@ -59,7 +59,7 @@ memory service, and graph. Tests construct it with in-memory exporters.
 |-----|-------|------|---------|
 | `agent-insight` | Agent Insight | `agent-insight.json` | Errors (by operation, type, and bounded source), the trace-derived Conversations card, Run volume, the Trajectory table, the Percentiles row (p95/p99), and the Scenarios row (skill tools, retrieval, memory). |
 | `token-cost` | Token & Cost | `token-cost.json` | Cost KPIs, spend trends, and cost by model / agent. Cost is derived in the dashboard from tokens × prices; there is no cost metric. |
-| `ai-adoption` | AI Adoption | `ai-adoption.json` | Executive adoption view: applications, agents, models, consumption, growth, health, and a per-application leaderboard with drilldowns. |
+| `ai-adoption` | AI Adoption | `ai-adoption.json` | Executive view with day-over-day KPIs: overview, token usage (model and agent performance), tool call analysis, and trace-based user activity. |
 
 All three dashboards share the `application` → `agent` → `model` cascade.
 
@@ -72,7 +72,7 @@ All three dashboards declare datasource inputs. Import a JSON via
 |---|---|
 | `agent-insight.json` | Prometheus (metrics) and Tempo (tracing) |
 | `token-cost.json` | Prometheus (metrics) |
-| `ai-adoption.json` | Prometheus (metrics) |
+| `ai-adoption.json` | Prometheus (metrics) and Tempo (traces) |
 
 Panels and query variables bind to the selected UIDs. The inputs are hidden
 template variables, so they add no controls to the dashboard. When provisioned
@@ -80,14 +80,25 @@ by this repository they default to the local `prometheus` and `tempo` UIDs.
 
 ### Adoption overview
 
-`ai-adoption.json` is the executive adoption view. Applications are counted from
-standard telemetry, not an onboarding registry: the value is the number of
-services that emitted GenAI metrics in the window. New applications compares the
-window with the preceding window of the same length. Agents and models are
-distinct standard metric label values. The environment filter defaults to `prod`;
-use `All` or `local` for the local demo. Estimated cost uses the same flat
-placeholder rates as `token-cost`. The application leaderboard links to Agent
-Insight and Token & Cost for each application.
+`ai-adoption.json` is the executive adoption view, organised in four rows:
+
+- **Overview**: distinct applications, agents, models and users, plus runs and
+  tokens. Applications are counted from standard telemetry, not an onboarding
+  registry: the value is the number of services that emitted GenAI metrics.
+- **Token Usage**: tokens, success rate, mean latency, TTFT, TPOT, cache hit rate,
+  call distribution, call/error/latency trends, and model and agent performance
+  tables.
+- **Tool Calls**: tool counts, latency and error rate, call/error/latency trends,
+  tool performance, tool error sources, and skill loads.
+- **Users**: distinct users and conversations, tokens and runs per user, and a
+  per-user activity table.
+
+KPI cards are fixed to the last 24 hours and compare with the previous 24 hours
+(day over day); the other panels follow the dashboard time picker. The environment
+filter defaults to `prod`; use `All` or `local` for the local demo. User,
+conversation and skill panels read traces rather than metrics, apply the
+environment and application filters, and are capped by the Tempo search limit
+(1000 spans).
 
 ### Conversations and users are trace-only
 
