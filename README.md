@@ -62,6 +62,17 @@ memory service, and graph. Tests construct it with in-memory exporters.
 
 Both dashboards share the `application` → `agent` → `model` cascade.
 
+### Importing into another Grafana
+
+`agent-insight.json` declares two datasource inputs. Import it via
+**Dashboards → New → Import** and select the Prometheus (metrics) and Tempo
+(tracing) data sources; panels and query variables bind to the selected UIDs.
+They are hidden template variables, so they add no controls to the dashboard.
+When provisioned by this repository they default to the local `prometheus` and
+`tempo` UIDs.
+
+`token-cost.json` targets the provisioned `prometheus` UID directly.
+
 ### Conversations and users are trace-only
 
 `gen_ai.conversation.id` and `enduser.id` are unbounded identifiers. Per standard
