@@ -428,7 +428,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 58
+        "y": 69
       },
       "id": 414,
       "title": "Errors",
@@ -494,7 +494,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 59
+        "y": 70
       },
       "id": 415,
       "maxDataPoints": 2000,
@@ -591,7 +591,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 59
+        "y": 70
       },
       "id": 416,
       "maxDataPoints": 2000,
@@ -678,7 +678,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 59
+        "y": 70
       },
       "id": 417,
       "options": {
@@ -1044,6 +1044,26 @@
         "overrides": [
           {
             "matcher": {
+              "id": "byRegexp",
+              "options": "^(gen_ai\\.request\\.model|Model)$"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Model"
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.width",
+                "value": 120
+              }
+            ]
+          },
+          {
+            "matcher": {
               "id": "byName",
               "options": "traceIdHidden"
             },
@@ -1069,6 +1089,10 @@
                     "targetBlank": true
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 90
               }
             ]
           },
@@ -1100,6 +1124,14 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 260
+              },
+              {
+                "id": "custom.wrapText",
+                "value": true
               }
             ]
           },
@@ -1131,6 +1163,14 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 280
+              },
+              {
+                "id": "custom.wrapText",
+                "value": true
               }
             ]
           },
@@ -1151,6 +1191,10 @@
               {
                 "id": "unit",
                 "value": "dateTimeAsIso"
+              },
+              {
+                "id": "custom.width",
+                "value": 150
               }
             ]
           },
@@ -1171,6 +1215,10 @@
               {
                 "id": "unit",
                 "value": "ns"
+              },
+              {
+                "id": "custom.width",
+                "value": 80
               }
             ]
           },
@@ -1187,6 +1235,10 @@
               {
                 "id": "custom.align",
                 "value": "left"
+              },
+              {
+                "id": "custom.width",
+                "value": 140
               }
             ]
           },
@@ -1203,6 +1255,10 @@
               {
                 "id": "custom.align",
                 "value": "left"
+              },
+              {
+                "id": "custom.width",
+                "value": 100
               }
             ]
           },
@@ -1219,6 +1275,10 @@
               {
                 "id": "custom.align",
                 "value": "left"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
               }
             ]
           },
@@ -1276,6 +1336,10 @@
                     }
                   ]
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 70
               }
             ]
           },
@@ -1333,6 +1397,10 @@
                     }
                   ]
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 70
               }
             ]
           },
@@ -1390,6 +1458,10 @@
                     }
                   ]
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 70
               }
             ]
           },
@@ -1447,6 +1519,10 @@
                     }
                   ]
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 70
               }
             ]
           },
@@ -1504,6 +1580,10 @@
                     }
                   ]
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 70
               }
             ]
           },
@@ -1577,6 +1657,10 @@
                     }
                   ]
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 70
               }
             ]
           },
@@ -1656,13 +1740,17 @@
                     }
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 80
               }
             ]
           }
         ]
       },
       "gridPos": {
-        "h": 13,
+        "h": 24,
         "w": 24,
         "x": 0,
         "y": 24
@@ -1684,7 +1772,8 @@
             "desc": true,
             "displayName": "Start"
           }
-        ]
+        ],
+        "enablePagination": true
       },
       "pluginVersion": "",
       "targets": [
@@ -1695,7 +1784,7 @@
           },
           "filters": [],
           "limit": 100,
-          "query": "{ span.gen_ai.agent.name =~ \"$agent\" } << { span.gen_ai.operation.name = \"invoke_workflow\" && resource.service.name =~ \"$application\" && span.gen_ai.request.model =~ \"$model\" } | select(span.gen_ai.input.messages, span.gen_ai.output.messages, span.gen_ai.usage.input_tokens, span.gen_ai.usage.output_tokens, span.gen_ai.usage.cache_read.input_tokens, span.gen_ai.usage.cache_write.input_tokens, span.gen_ai.usage.reasoning.output_tokens, span.poc.ttft, span.enduser.id, span.gen_ai.conversation.id)",
+          "query": "{ span.gen_ai.agent.name =~ \"$agent\" } << { span.gen_ai.operation.name = \"invoke_workflow\" && resource.service.name =~ \"$application\" && span.gen_ai.request.model =~ \"$model\" } | select(span.gen_ai.request.model, span.gen_ai.input.messages, span.gen_ai.output.messages, span.gen_ai.usage.input_tokens, span.gen_ai.usage.output_tokens, span.gen_ai.usage.cache_read.input_tokens, span.gen_ai.usage.cache_write.input_tokens, span.gen_ai.usage.reasoning.output_tokens, span.poc.ttft, span.enduser.id, span.gen_ai.conversation.id)",
           "queryType": "traceql",
           "refId": "A",
           "tableType": "spans"
@@ -1724,7 +1813,6 @@
               "spanID": true,
               "traceName": true,
               "gen_ai.operation.name": true,
-              "gen_ai.request.model": true,
               "service.name": true,
               "poc.error_count": true,
               "poc.inference_calls": true,
@@ -1744,40 +1832,43 @@
               "poc.ttft": "TTFT",
               "traceService": "Entry Application",
               "enduser.id": "User ID",
-              "gen_ai.conversation.id": "Session ID"
+              "gen_ai.conversation.id": "Session ID",
+              "gen_ai.request.model": "Model"
             },
             "indexByName": {
               "traceIdHidden": 0,
               "Trace ID": 0,
-              "traceService": 1,
-              "Trace Service": 1,
-              "Entry Application": 1,
-              "gen_ai.input.messages": 2,
-              "Input": 2,
-              "gen_ai.output.messages": 3,
-              "Output": 3,
-              "time": 4,
-              "Start time": 4,
-              "Start": 4,
-              "duration": 5,
-              "Duration": 5,
-              "gen_ai.usage.input_tokens": 6,
-              "Input Tokens": 6,
-              "gen_ai.usage.output_tokens": 7,
-              "Output Tokens": 7,
-              "gen_ai.usage.cache_read.input_tokens": 8,
-              "Cache Read": 8,
-              "gen_ai.usage.cache_write.input_tokens": 9,
-              "Cache Write": 9,
-              "gen_ai.usage.reasoning.output_tokens": 10,
-              "Reasoning": 10,
-              "poc.ttft": 11,
-              "TTFT": 11,
-              "Cache Rate": 12,
-              "enduser.id": 13,
-              "User ID": 13,
-              "gen_ai.conversation.id": 14,
-              "Session ID": 14
+              "gen_ai.request.model": 1,
+              "Model": 1,
+              "traceService": 2,
+              "Trace Service": 2,
+              "Entry Application": 2,
+              "gen_ai.input.messages": 3,
+              "Input": 3,
+              "gen_ai.output.messages": 4,
+              "Output": 4,
+              "time": 5,
+              "Start time": 5,
+              "Start": 5,
+              "duration": 6,
+              "Duration": 6,
+              "gen_ai.usage.input_tokens": 7,
+              "Input Tokens": 7,
+              "gen_ai.usage.output_tokens": 8,
+              "Output Tokens": 8,
+              "gen_ai.usage.cache_read.input_tokens": 9,
+              "Cache Read": 9,
+              "gen_ai.usage.cache_write.input_tokens": 10,
+              "Cache Write": 10,
+              "gen_ai.usage.reasoning.output_tokens": 11,
+              "Reasoning": 11,
+              "poc.ttft": 12,
+              "TTFT": 12,
+              "Cache Rate": 13,
+              "enduser.id": 14,
+              "User ID": 14,
+              "gen_ai.conversation.id": 15,
+              "Session ID": 15
             }
           }
         }
@@ -1790,7 +1881,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 67
+        "y": 78
       },
       "id": 100,
       "title": "Who is slowing things down",
@@ -1802,7 +1893,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 37
+        "y": 48
       },
       "id": 120,
       "title": "How a request flows",
@@ -1816,7 +1907,7 @@
         "h": 20,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 49
       },
       "datasource": {
         "type": "prometheus",
@@ -2029,7 +2120,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 68
+        "y": 79
       },
       "id": 111,
       "maxDataPoints": 2000,
@@ -2192,7 +2283,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 75
+        "y": 86
       },
       "id": 112,
       "maxDataPoints": 2000,
@@ -2355,7 +2446,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 82
+        "y": 93
       },
       "id": 113,
       "maxDataPoints": 2000,
@@ -2529,7 +2620,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 68
+        "y": 79
       },
       "id": 114,
       "maxDataPoints": 2000,
@@ -2692,7 +2783,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 75
+        "y": 86
       },
       "id": 115,
       "maxDataPoints": 2000,
@@ -2855,7 +2946,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 82
+        "y": 93
       },
       "id": 118,
       "maxDataPoints": 2000,
@@ -3137,7 +3228,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 111
+        "y": 122
       },
       "id": 130,
       "title": "Tools",
@@ -3169,7 +3260,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 112
+        "y": 123
       },
       "id": 131,
       "options": {
@@ -3260,7 +3351,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 112
+        "y": 123
       },
       "id": 132,
       "maxDataPoints": 2000,
@@ -3345,7 +3436,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 119
+        "y": 130
       },
       "id": 133,
       "maxDataPoints": 2000,
@@ -3430,7 +3521,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 119
+        "y": 130
       },
       "id": 134,
       "maxDataPoints": 2000,
@@ -3472,7 +3563,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 127
+        "y": 138
       },
       "id": 140,
       "title": "Models",
@@ -3504,7 +3595,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 128
+        "y": 139
       },
       "id": 141,
       "options": {
@@ -3595,7 +3686,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 128
+        "y": 139
       },
       "id": 142,
       "maxDataPoints": 2000,
@@ -3680,7 +3771,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 135
+        "y": 146
       },
       "id": 143,
       "maxDataPoints": 2000,
@@ -3765,7 +3856,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 135
+        "y": 146
       },
       "id": 144,
       "maxDataPoints": 2000,
@@ -3850,7 +3941,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 142
+        "y": 153
       },
       "id": 145,
       "maxDataPoints": 2000,
@@ -3905,7 +3996,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 142
+        "y": 153
       },
       "id": 146,
       "options": {
@@ -3996,7 +4087,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 149
+        "y": 160
       },
       "id": 147,
       "maxDataPoints": 2000,
@@ -4081,7 +4172,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 149
+        "y": 160
       },
       "id": 148,
       "maxDataPoints": 2000,
@@ -4177,7 +4268,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 156
+        "y": 167
       },
       "id": 149,
       "maxDataPoints": 2000,
@@ -4361,7 +4452,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 164
+        "y": 175
       },
       "id": 201,
       "title": "Scenarios",
@@ -4494,7 +4585,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 165
+        "y": 176
       },
       "id": 202,
       "maxDataPoints": 2000,
@@ -4655,7 +4746,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 165
+        "y": 176
       },
       "id": 203,
       "maxDataPoints": 2000,
@@ -4816,7 +4907,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 172
+        "y": 183
       },
       "id": 204,
       "maxDataPoints": 2000,
@@ -4977,7 +5068,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 172
+        "y": 183
       },
       "id": 205,
       "maxDataPoints": 2000,
@@ -5138,7 +5229,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 172
+        "y": 183
       },
       "id": 206,
       "maxDataPoints": 2000,
@@ -5178,7 +5269,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 89
+        "y": 100
       },
       "id": 300,
       "title": "Percentiles",
@@ -5312,7 +5403,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 90
+        "y": 101
       },
       "id": 301,
       "maxDataPoints": 2000,
@@ -5483,7 +5574,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 90
+        "y": 101
       },
       "id": 302,
       "maxDataPoints": 2000,
@@ -5654,7 +5745,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 97
+        "y": 108
       },
       "id": 303,
       "maxDataPoints": 2000,
@@ -5825,7 +5916,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 97
+        "y": 108
       },
       "id": 304,
       "maxDataPoints": 2000,
@@ -5996,7 +6087,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 97
+        "y": 108
       },
       "id": 305,
       "maxDataPoints": 2000,
