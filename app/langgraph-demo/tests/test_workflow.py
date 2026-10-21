@@ -12,7 +12,7 @@ from memory import JsonMemoryStore, MemoryService
 from skills import SkillRepository, SkillTools
 from support import make_settings
 from telemetry import Telemetry
-from tools import HttpClient, WebTools
+from tools import WebTools
 from workflow import WorkflowRunner
 
 
@@ -51,21 +51,17 @@ class WorkflowTest(unittest.TestCase):
 
     def test_graph_builds_with_real_components(self):
         telemetry = Telemetry(self.settings)
-        http = HttpClient(5)
-        try:
-            llm = ChatClient(self.settings, telemetry)
-            web = WebTools(http, telemetry)
-            skills = SkillTools(SkillRepository(Path(self.settings.skills_root)), telemetry)
-            graph = build_graph(GraphDependencies(
-                llm=llm,
-                telemetry=telemetry,
-                weather_tools=(web.weather_tool(),),
-                currency_tools=(web.currency_tool(),),
-                policy_tools=tuple(skills.tools()),
-            ))
-            self.assertIsNotNone(graph)
-        finally:
-            http.close()
+        llm = ChatClient(self.settings, telemetry)
+        web = WebTools(telemetry)
+        skills = SkillTools(SkillRepository(Path(self.settings.skills_root)), telemetry)
+        graph = build_graph(GraphDependencies(
+            llm=llm,
+            telemetry=telemetry,
+            weather_tools=(web.weather_tool(),),
+            currency_tools=(web.currency_tool(),),
+            policy_tools=tuple(skills.tools()),
+        ))
+        self.assertIsNotNone(graph)
 
 
 if __name__ == "__main__":

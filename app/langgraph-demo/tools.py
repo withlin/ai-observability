@@ -1,7 +1,4 @@
-import concurrent.futures
 import json
-import urllib.parse
-import urllib.request
 from typing import Annotated
 
 from langchain_core.tools import InjectedToolCallId
@@ -9,41 +6,48 @@ from langchain_core.tools import InjectedToolCallId
 from context import current_context
 from telemetry import Telemetry
 
+# Rates are quoted per 1 USD; cross rates are derived from this table.
+USD_RATES = {
+    "USD": 1.0,
+    "EUR": 0.92,
+    "JPY": 150.0,
+    "GBP": 0.79,
+    "CAD": 1.36,
+    "CNY": 7.20,
+    "AUD": 1.52,
+    "CHF": 0.88,
+}
 
-class HttpClient:
-    """Text fetcher with a wall-clock deadline that also covers DNS/connect stalls."""
+WEATHER = {
+    "tokyo": "Tokyo: clear, +24°C",
+    "lisbon": "Lisbon: partly cloudy, +21°C",
+    "toronto": "Toronto: cloudy, +15°C",
+}
 
-    def __init__(self, timeout: float):
-        self._timeout = timeout
-        self._pool = concurrent.futures.ThreadPoolExecutor(
-            max_workers=4, thread_name_prefix="tool-http"
-        )
 
-    def _fetch(self, url: str) -> str:
-        request = urllib.request.Request(url, headers={"User-Agent": "curl/8.0"})
-        with urllib.request.urlopen(request, timeout=self._timeout) as response:
-            return response.read().decode("utf-8", "replace")
+def _weather_for(city: str) -> str:
+    name = city.strip()
+    return WEATHER.get(name.lower(), f"{name.title()}: clear, +20°C")
 
-    def get_text(self, url: str) -> str:
-        future = self._pool.submit(self._fetch, url)
-        try:
-            return future.result(timeout=self._timeout + 5)
-        except concurrent.futures.TimeoutError:
-            raise TimeoutError(
-                f"HTTP fetch exceeded {self._timeout + 5:.0f}s: {url}"
-            ) from None
 
-    def close(self) -> None:
-        self._pool.shutdown(wait=False, cancel_futures=True)
+def _rate_data(source: str) -> dict:
+    base = USD_RATES.get(source)
+    if base is None:
+        return {"result": "error", "error-type": "unknown-code"}
+    return {
+        "result": "success",
+        "rates": {
+            code: rate / base for code, rate in USD_RATES.items()
+        },
+    }
 
 
 class WebTools:
     """Weather and currency tools bound to their owning agents."""
 
-    def __init__(self, http: HttpClient, telemetry: Telemetry,
+    def __init__(self, telemetry: Telemetry,
                  weather_agent: str = "weather_agent",
                  currency_agent: str = "currency_agent"):
-        self._http = http
         self._telemetry = telemetry
         self._weather_agent = weather_agent
         self._currency_agent = currency_agent
@@ -51,7 +55,7 @@ class WebTools:
     def weather_tool(self):
         def get_weather(city: str,
                         tool_call_id: Annotated[str, InjectedToolCallId] = "") -> str:
-            """Get the current weather for a city (real-time, via wttr.in)."""
+            """Get the current weather for a city (simulated data)."""
             context = current_context()
             with self._telemetry.tool_span(
                 "get_weather",
@@ -62,9 +66,7 @@ class WebTools:
                 agent_name=self._weather_agent,
                 context=context,
             ) as span:
-                result = self._http.get_text(
-                    "https://wttr.in/" + urllib.parse.quote(city.strip()) + "?format=3"
-                ).strip()
+                result = _weather_for(city)
                 span.set_result(result)
                 return result
 
@@ -73,7 +75,7 @@ class WebTools:
     def currency_tool(self):
         def convert_currency(amount: float, from_currency: str, to_currency: str,
                              tool_call_id: Annotated[str, InjectedToolCallId] = "") -> str:
-            """Convert an amount between currencies using real-time rates (via open.er-api.com)."""
+            """Convert an amount between currencies using simulated rates."""
             context = current_context()
             arguments = {
                 "amount": amount,
@@ -91,9 +93,7 @@ class WebTools:
             ) as span:
                 source = from_currency.strip().upper()
                 target = to_currency.strip().upper()
-                data = json.loads(self._http.get_text(
-                    f"https://open.er-api.com/v6/latest/{urllib.parse.quote(source)}"
-                ))
+                data = _rate_data(source)
                 if data.get("result") != "success":
                     raise RuntimeError(
                         f"rate provider error: {data.get('error-type', 'unknown')}"

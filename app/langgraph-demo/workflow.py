@@ -12,7 +12,7 @@ from memory import JsonMemoryStore, MemoryService
 from models import TokenUsage
 from skills import SkillRepository, SkillTools
 from telemetry import Telemetry
-from tools import HttpClient, WebTools
+from tools import WebTools
 
 WORKFLOW_NAME = "travel_workflow"
 
@@ -153,12 +153,11 @@ class WorkflowRunner:
 def main() -> None:
     settings = Settings.from_env()
     telemetry = Telemetry(settings)
-    http = HttpClient(settings.tool_timeout)
     llm = ChatClient(settings, telemetry)
     memory = MemoryService(JsonMemoryStore(Path(settings.memory_path)), telemetry)
     skills = SkillRepository(Path(settings.skills_root))
     skill_tools = tuple(SkillTools(skills, telemetry).tools())
-    web = WebTools(http, telemetry)
+    web = WebTools(telemetry)
     graph = build_graph(GraphDependencies(
         llm=llm,
         telemetry=telemetry,
@@ -170,5 +169,4 @@ def main() -> None:
     try:
         runner.run_all()
     finally:
-        http.close()
         telemetry.shutdown()

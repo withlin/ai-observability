@@ -3,8 +3,10 @@ import time
 from contextlib import contextmanager
 from typing import Any
 
-from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+import requests
+import urllib3
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.metrics import Counter, Histogram, MeterProvider, UpDownCounter
 from opentelemetry.sdk.metrics.export import (
     AggregationTemporality,
@@ -17,10 +19,19 @@ from opentelemetry.sdk.trace import Span, TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from opentelemetry.trace import SpanKind, Status, StatusCode
+from urllib3.exceptions import InsecureRequestWarning
 
 from config import Settings
 from context import RunContext
 from models import TokenUsage
+
+class _NoVerifySession(requests.Session):
+    """Session that forces verify=False regardless of the exporter's setting."""
+
+    def request(self, *args, **kwargs):
+        kwargs["verify"] = False
+        return super().request(*args, **kwargs)
+
 
 _ROLE = {"human": "user", "ai": "assistant", "system": "system", "tool": "tool"}
 TOKEN_BUCKETS = [1, 10, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000]
@@ -108,12 +119,19 @@ class Telemetry:
         self._settings = settings
         self.capture_content = settings.capture_content
         self._in_memory = settings.in_memory_telemetry if in_memory is None else in_memory
+        span_session = metric_session = None
+        if settings.otlp_tls_skip_verify:
+            urllib3.disable_warnings(InsecureRequestWarning)
+            span_session = _NoVerifySession()
+            metric_session = _NoVerifySession()
 
-        resource = Resource.create({
-            "service.name": "langgraph-agent",
+        resource_attributes = {
             "service.version": "4.0.0",
             "deployment.environment": "local",
-        })
+        }
+        resource_attributes.update(settings.resource_attributes)
+        resource_attributes["service.name"] = settings.service_name
+        resource = Resource.create(resource_attributes)
 
         self.tracer_provider = TracerProvider(resource=resource)
         self.span_exporter: InMemorySpanExporter | None = None
@@ -123,7 +141,12 @@ class Telemetry:
         else:
             self.tracer_provider.add_span_processor(
                 BatchSpanProcessor(
-                    OTLPSpanExporter(endpoint=settings.otlp_endpoint, insecure=True)
+                    OTLPSpanExporter(
+                        endpoint=settings.otlp_traces_endpoint,
+                        headers=settings.otlp_traces_headers,
+                        certificate_file=settings.otlp_certificate,
+                        session=span_session,
+                    )
                 )
             )
         self.tracer = self.tracer_provider.get_tracer("gen_ai.langgraph")
@@ -133,8 +156,10 @@ class Telemetry:
         else:
             self.metric_reader = PeriodicExportingMetricReader(
                 OTLPMetricExporter(
-                    endpoint=settings.otlp_endpoint,
-                    insecure=True,
+                    endpoint=settings.otlp_metrics_endpoint,
+                    headers=settings.otlp_metrics_headers,
+                    certificate_file=settings.otlp_certificate,
+                    session=metric_session,
                     preferred_temporality={
                         Counter: AggregationTemporality.CUMULATIVE,
                         Histogram: AggregationTemporality.CUMULATIVE,

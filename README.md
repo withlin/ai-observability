@@ -14,8 +14,8 @@ LangGraph agent --OTLP--> OTel Collector --> Tempo (traces) + Prometheus (metric
 
 | Hop | Endpoint | Data |
 |---|---|---|
-| LangGraph app | OTLP gRPC `localhost:4317` | spans and metrics |
-| OTel Collector | receiver `:4317`; trace exporter `tempo:4317`; metrics exporter `:8889`; self-metrics `:8888` | batches and routes |
+| LangGraph app | OTLP/HTTP `localhost:4318` (HTTPS for remote collectors) | spans and metrics |
+| OTel Collector | receiver `:4318` (HTTP; `:4317` gRPC also enabled); trace exporter `tempo:4317`; metrics exporter `:8889`; self-metrics `:8888` | batches and routes |
 | Tempo | OTLP ingest `tempo:4317` (internal); HTTP API `:3200` | traces; span metrics remote-written to Prometheus |
 | Prometheus | host `:9091` | scrapes `otel-collector:8889` and receives Tempo span metrics |
 | Grafana | `:3000` | Tempo + Prometheus datasources |
@@ -29,22 +29,24 @@ standard document. The official standard files are not modified by the example.
 
 ## Code layout
 
-The demo uses explicit dependencies instead of global telemetry state:
+The demo is a standalone project in `app/langgraph-demo/` with its own
+`requirements.txt`. It uses explicit dependencies instead of global telemetry
+state:
 
 | Module | Responsibility |
 |---|---|
-| `app/config.py` | `Settings` (environment, models, paths) |
-| `app/context.py` | `RunContext` carried by a `ContextVar` per run |
-| `app/models.py` | `TokenUsage`, `InferenceResult`, `Skill`, `SearchHit`, `MemoryRecord` |
-| `app/telemetry.py` | `Telemetry` facade: spans, metrics, content switch, serialization |
-| `app/llm.py` | `ChatClient`: streaming inference plus inference telemetry |
-| `app/tools.py` | `HttpClient`, `WebTools` (weather / currency) |
-| `app/skills.py` | `SkillRepository` (files/search/scripts) and `SkillTools` |
-| `app/memory.py` | `JsonMemoryStore` and `MemoryService` |
-| `app/prompts.py` | Prompt constants |
-| `app/graph.py` | `AgentSpec`, supervisor/specialist/writer nodes, graph builder |
-| `app/workflow.py` | Conversations, `WorkflowRunner`, dependency wiring, `main` |
-| `app/langgraph_app.py` | Entry point |
+| `app/langgraph-demo/config.py` | `Settings` (environment, models, paths) |
+| `app/langgraph-demo/context.py` | `RunContext` carried by a `ContextVar` per run |
+| `app/langgraph-demo/models.py` | `TokenUsage`, `InferenceResult`, `Skill`, `SearchHit`, `MemoryRecord` |
+| `app/langgraph-demo/telemetry.py` | `Telemetry` facade: spans, metrics, content switch, serialization |
+| `app/langgraph-demo/llm.py` | `ChatClient`: streaming inference plus inference telemetry |
+| `app/langgraph-demo/tools.py` | `WebTools` (simulated weather / currency data) |
+| `app/langgraph-demo/skills.py` | `SkillRepository` (files/search/scripts) and `SkillTools` |
+| `app/langgraph-demo/memory.py` | `JsonMemoryStore` and `MemoryService` |
+| `app/langgraph-demo/prompts.py` | Prompt constants |
+| `app/langgraph-demo/graph.py` | `AgentSpec`, supervisor/specialist/writer nodes, graph builder |
+| `app/langgraph-demo/workflow.py` | Conversations, `WorkflowRunner`, dependency wiring, `main` |
+| `app/langgraph-demo/langgraph_app.py` | Entry point |
 
 `Telemetry` owns its OTel providers and is injected into the LLM client, tools,
 memory service, and graph. Tests construct it with in-memory exporters.
@@ -58,8 +60,7 @@ memory service, and graph. Tests construct it with in-memory exporters.
 | `agent-insight` | Agent Insight | `agent-insight.json` | Errors (by operation, type, and bounded source), the trace-derived Conversations card, Run volume, the Trajectory table, the Percentiles row (p95/p99), and the Scenarios row (skills, retrieval, memory). |
 | `token-cost` | Token & Cost | `token-cost.json` | Cost KPIs, spend trends, and cost by model / agent. Cost is derived in the dashboard from tokens × prices; there is no cost metric. |
 
-Both dashboards share the `application` → `agent` → `model` cascade. Agent
-Insight also has a `skill` filter.
+Both dashboards share the `application` → `agent` → `model` cascade.
 
 ### Conversations and users are trace-only
 
@@ -95,7 +96,7 @@ and never expose the raw attribute key as a visible column or legend.
 The Percentiles row charts p95 and p99 for inference, agent, tool, TTFT, and
 retrieval/memory operations. Inference, agent, and TTFT use the app-emitted
 histograms; tool and scenario percentiles use Tempo span-metric latency so short
-demo runs still render. Use the model/agent/skill filters to isolate the relevant
+demo runs still render. Use the model/agent filters to isolate the relevant
 lines.
 
 The **Models** row also charts **TPOT** (time per output token), derived
@@ -147,7 +148,10 @@ invoke_workflow travel_workflow
 └─ create_memory                          INTERNAL
 ```
 
-- **Agent Skill**: `app/skills/travel_policy/` contains `SKILL.md`,
+- **Simulated tools**: weather and currency tools return deterministic local
+  data and make no external calls. Spans, metrics and the conversion logic are
+  identical to a live implementation.
+- **Agent Skill**: `app/langgraph-demo/skills/travel_policy/` contains `SKILL.md`,
   `references/` and `scripts/estimate_budget.py`. The policy agent loads the
   skill, reads references, and calls the dedicated `estimate_budget` tool, which
   executes the skill script as a real subprocess. `run_skill_script` remains the
@@ -157,9 +161,9 @@ invoke_workflow travel_workflow
   retrieval span carries `gen_ai.data_source.id=travel-policy-docs` and
   `gen_ai.retrieval.top_k`; query text and hit documents are Opt-In content.
 - **Memory**: a local JSON store (`POC_MEMORY_PATH`, default
-  `app/.state/memory.json`) keyed by `gen_ai.conversation.id`. The first run of a
-  conversation writes a Q/A record; the second run reads it back. Writes are
-  atomic and malformed files do not fail the run.
+  `app/langgraph-demo/.state/memory.json`) keyed by `gen_ai.conversation.id`.
+  The first run of a conversation writes a Q/A record; the second run reads it
+  back. Writes are atomic and malformed files do not fail the run.
 - **Content switch**: messages, tool arguments/results, retrieval query/documents,
   memory query/records and tool definitions are emitted only when
   `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true`. The default is off.
@@ -243,15 +247,38 @@ contract keeps usage on `chat` / `invoke_agent` and does not define `poc.*`.
 
 ## Running
 
-Prerequisites: Docker (Collector + Tempo + Prometheus + Grafana) and an
-OpenAI-compatible LLM gateway.
+Prerequisites: Python 3.10+, Docker (Collector + Tempo + Prometheus + Grafana)
+and an OpenAI-compatible LLM gateway.
+
+### Dependencies
+
+```bash
+python3 -m venv app/langgraph-demo/.venv
+. app/langgraph-demo/.venv/bin/activate
+pip install -r app/langgraph-demo/requirements.txt
+```
+
+For an offline or air-gapped target, download the wheel set on a connected host
+and install from it (run the download on the same OS and Python version as the
+target):
+
+```bash
+pip download -r app/langgraph-demo/requirements.txt -d app/langgraph-demo/wheels/
+pip install --no-index --find-links app/langgraph-demo/wheels/ \
+  -r app/langgraph-demo/requirements.txt
+```
+
+The app exports over OTLP **HTTP/protobuf** only; the gRPC exporter is not a
+dependency.
+
+### Local stack
 
 ```bash
 # 1. Start the observability stack
 docker compose up -d
 
 # 2. Configure the app
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 export POC_LLM_BASE_URL=http://127.0.0.1:4141/v1
 export POC_MODELS=gemini-3.8-flash,gpt-4o,kimi-k3
 export POC_RUNS=6
@@ -259,15 +286,70 @@ export POC_INTERVAL=3
 export OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true
 
 # 3. Run the agent (terminal 1)
-python3 app/langgraph_app.py
+python3 app/langgraph-demo/langgraph_app.py
 
 ```
+
+### Third-party collector
+
+`OTEL_EXPORTER_OTLP_ENDPOINT` accepts any OTLP/HTTP URL. An `https://` URL
+enables TLS with the system CA store; remote collectors do not need the local
+Docker stack.
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp.example.com:4318
+export OTEL_EXPORTER_OTLP_USERNAME=instance-id
+export OTEL_EXPORTER_OTLP_PASSWORD=api-token
+export OTEL_EXPORTER_OTLP_TLS_SKIP_VERIFY=true   # self-signed endpoint
+export OTEL_SERVICE_NAME=travel-assistant
+export OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging
+python3 app/langgraph-demo/langgraph_app.py
+```
+
+`OTEL_EXPORTER_OTLP_TLS_SKIP_VERIFY=true` disables certificate verification for
+self-signed or internal-CA endpoints. Leave it unset to verify against the
+system CA store, or point `OTEL_EXPORTER_OTLP_CERTIFICATE` at a CA bundle.
+
+The base URL is extended with `/v1/traces` and `/v1/metrics`. If the provider
+publishes separate signal URLs, set the full endpoints instead:
+
+```bash
+export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://otlp.example.com/otlp/v1/traces
+export OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=https://otlp.example.com/otlp/v1/metrics
+```
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:4318` | Base OTLP/HTTP URL; signal paths are appended. Use `https://` for TLS. |
+| `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` | `<base>/v1/traces` | Full trace endpoint, used as-is. |
+| `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` | `<base>/v1/metrics` | Full metric endpoint, used as-is. |
+| `OTEL_EXPORTER_OTLP_HEADERS` | empty | Extra headers as comma-separated `key=value` pairs; values may be percent-encoded. |
+| `OTEL_EXPORTER_OTLP_TRACES_HEADERS` / `OTEL_EXPORTER_OTLP_METRICS_HEADERS` | empty | Signal-specific headers, merged over the base headers. |
+| `OTEL_EXPORTER_OTLP_USERNAME` / `OTEL_EXPORTER_OTLP_PASSWORD` | empty | Basic auth credentials; both must be set. Ignored when an `Authorization` header is supplied. |
+| `OTEL_EXPORTER_OTLP_CERTIFICATE` | system CA | Path to a CA bundle for verifying an HTTPS collector. |
+| `OTEL_EXPORTER_OTLP_TLS_SKIP_VERIFY` | `false` | Disable HTTPS certificate verification (self-signed endpoints). |
+| `OTEL_SERVICE_NAME` | `langgraph-agent` | `service.name` resource attribute. |
+| `OTEL_RESOURCE_ATTRIBUTES` | empty | Extra resource attributes (comma-separated `key=value`); can override `deployment.environment` (default `local`) and `service.version` (default `4.0.0`). |
+
+App-level variables:
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `POC_LLM_BASE_URL` | `http://127.0.0.1:4141/v1` | OpenAI-compatible gateway used for inference. |
+| `POC_MODELS` | `gemini-3.8-flash,gpt-4o,kimi-k3` | Comma-separated model rotation. |
+| `POC_RUNS` | `1` | Number of workflow runs; `0` runs until interrupted. |
+| `POC_INTERVAL` | `0` | Seconds between runs. |
+| `POC_PROVIDER_NAME` | `openai` | Value for `gen_ai.provider.name`. |
+| `POC_MEMORY_PATH` | `app/langgraph-demo/.state/memory.json` | Local memory store. |
+| `POC_SKILLS_ROOT` | `app/langgraph-demo/skills` | Agent Skills root directory. |
+| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | `false` | Opt-in message, tool, retrieval and memory content. |
 
 `POC_RUNS=0` runs until interrupted. The first run of a conversation has no
 memory; the second run reads the first run's Q/A from the memory store.
 
-Ports: Grafana `:3000`, Prometheus `:9091`, Tempo `:3200`, OTLP `:4317` (gRPC) /
-`:4318` (HTTP), Collector self-metrics `:8888`.
+Ports: Grafana `:3000`, Prometheus `:9091`, Tempo `:3200`, OTLP/HTTP `:4318`
+(the app's exporter), OTLP/gRPC `:4317` (available but unused by the app), and
+Collector self-metrics `:8888`.
 
 ### Tempo dimensions
 

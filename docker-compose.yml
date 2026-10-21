@@ -7,8 +7,8 @@ services:
     volumes:
       - ./otel-collector/config.yaml:/etc/otelcol/config.yaml:ro
     ports:
-      - "4317:4317"   # OTLP gRPC  (app -> collector)
-      - "4318:4318"   # OTLP HTTP
+      - "4317:4317"   # OTLP gRPC  (optional; the app uses HTTP)
+      - "4318:4318"   # OTLP HTTP  (app -> collector)
       - "8889:8889"   # Prometheus exporter (Prometheus scrapes this)
       - "8888:8888"   # Collector self-metrics (accepted/sent/failed spans)
     depends_on:

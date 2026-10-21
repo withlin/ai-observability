@@ -24,6 +24,19 @@ class TelemetryTest(unittest.TestCase):
             [{"role": "user", "parts": [{"type": "text", "content": "weather?"}]}],
         )
 
+    def test_resource_reflects_settings(self):
+        telemetry = Telemetry(make_settings(
+            service_name="travel-assistant",
+            resource_attributes={
+                "deployment.environment": "staging",
+                "service.version": "9.9.9",
+            },
+        ))
+        attributes = telemetry.tracer_provider.resource.attributes
+        self.assertEqual("travel-assistant", attributes["service.name"])
+        self.assertEqual("staging", attributes["deployment.environment"])
+        self.assertEqual("9.9.9", attributes["service.version"])
+
     def test_instruments_exist(self):
         telemetry = Telemetry(make_settings())
         for name in (

@@ -1,8 +1,9 @@
 # Runtime state
-app/.state/
+app/langgraph-demo/.state/
 *.log
 
 # Python caches and build artifacts
+app/langgraph-demo/wheels/
 __pycache__/
 *.py[cod]
 *$py.class
