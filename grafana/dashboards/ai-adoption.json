@@ -534,19 +534,6 @@
       "hideTimeOverride": true
     },
     {
-      "id": 180,
-      "type": "row",
-      "title": "Trends",
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 7
-      },
-      "panels": []
-    },
-    {
       "id": 181,
       "type": "timeseries",
       "title": "Runs and errors",
@@ -557,9 +544,9 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 8,
+        "w": 24,
         "x": 0,
-        "y": 8
+        "y": 7
       },
       "targets": [
         {
@@ -674,6 +661,528 @@
       }
     },
     {
+      "id": 110,
+      "type": "row",
+      "title": "Token Usage",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "panels": []
+    },
+    {
+      "id": 111,
+      "type": "stat",
+      "title": "Tokens",
+      "description": "Input plus output tokens. Last 24 hours vs previous 24 hours.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 0,
+        "y": 16
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "((sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))) + (sum(increase(gen_ai_client_inference_usage_output_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_output_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))))",
+          "refId": "A",
+          "instant": false,
+          "range": true,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#334155",
+                "value": null
+              },
+              {
+                "color": "#F59E0B",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "text": {
+          "percentSize": 26,
+          "titleSize": 0,
+          "valueSize": 42
+        },
+        "textMode": "value"
+      },
+      "timeFrom": "now-24h",
+      "hideTimeOverride": true
+    },
+    {
+      "id": 191,
+      "type": "stat",
+      "title": "Input tokens",
+      "description": "Input tokens. Last 24 hours vs previous 24 hours.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 4,
+        "y": 16
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "(sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])))",
+          "refId": "A",
+          "instant": false,
+          "range": true,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#334155",
+                "value": null
+              },
+              {
+                "color": "#DB2777",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "text": {
+          "percentSize": 26,
+          "titleSize": 0,
+          "valueSize": 42
+        },
+        "textMode": "value"
+      },
+      "timeFrom": "now-24h",
+      "hideTimeOverride": true
+    },
+    {
+      "id": 192,
+      "type": "stat",
+      "title": "Output tokens",
+      "description": "Output tokens. Last 24 hours vs previous 24 hours.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 8,
+        "y": 16
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "(sum(increase(gen_ai_client_inference_usage_output_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_output_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])))",
+          "refId": "A",
+          "instant": false,
+          "range": true,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#334155",
+                "value": null
+              },
+              {
+                "color": "#0EA5E9",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "text": {
+          "percentSize": 26,
+          "titleSize": 0,
+          "valueSize": 42
+        },
+        "textMode": "value"
+      },
+      "timeFrom": "now-24h",
+      "hideTimeOverride": true
+    },
+    {
+      "id": 193,
+      "type": "stat",
+      "title": "Cache read tokens",
+      "description": "Cache-read input tokens. Last 24 hours vs previous 24 hours.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 12,
+        "y": 16
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(increase(gen_ai_client_inference_usage_cache_read_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))",
+          "refId": "A",
+          "instant": false,
+          "range": true,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#334155",
+                "value": null
+              },
+              {
+                "color": "#7C3AED",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "text": {
+          "percentSize": 26,
+          "titleSize": 0,
+          "valueSize": 42
+        },
+        "textMode": "value"
+      },
+      "timeFrom": "now-24h",
+      "hideTimeOverride": true
+    },
+    {
+      "id": 116,
+      "type": "stat",
+      "title": "Cache hit rate",
+      "description": "Cache-read tokens divided by input tokens. Last 24 hours vs previous 24 hours.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 16,
+        "y": 16
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "100 * sum(increase(gen_ai_client_inference_usage_cache_read_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) / clamp_min((sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))), 1) and ((sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))) > 0)",
+          "refId": "A",
+          "instant": false,
+          "range": true,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "unit": "percent",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#334155",
+                "value": null
+              },
+              {
+                "color": "#10B981",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "text": {
+          "percentSize": 26,
+          "titleSize": 0,
+          "valueSize": 42
+        },
+        "textMode": "value"
+      },
+      "timeFrom": "now-24h",
+      "hideTimeOverride": true
+    },
+    {
+      "id": 194,
+      "type": "stat",
+      "title": "Tokens per call",
+      "description": "Mean input plus output tokens per inference call. Last 24 hours vs previous 24 hours.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 20,
+        "y": 16
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "(((sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))) + (sum(increase(gen_ai_client_inference_usage_output_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_output_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))))) / clamp_min(sum(increase(gen_ai_client_inference_duration_seconds_count{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])), 1) and (sum(increase(gen_ai_client_inference_duration_seconds_count{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) > 0)",
+          "refId": "A",
+          "instant": false,
+          "range": true,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#334155",
+                "value": null
+              },
+              {
+                "color": "#22D3EE",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "text": {
+          "percentSize": 26,
+          "titleSize": 0,
+          "valueSize": 42
+        },
+        "textMode": "value"
+      },
+      "timeFrom": "now-24h",
+      "hideTimeOverride": true
+    },
+    {
+      "id": 195,
+      "type": "piechart",
+      "title": "Tokens by model",
+      "description": "Input plus output tokens by requested model in the selected range.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 23
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "topk(10, ((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range])) or sum by (gen_ai_request_model)(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range]))) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range])) or sum by (gen_ai_request_model)(increase(gen_ai_client_inference_operation_output_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range])))))",
+          "refId": "A",
+          "instant": false,
+          "range": true,
+          "format": "time_series"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "pieType": "donut",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      }
+    },
+    {
       "id": 182,
       "type": "timeseries",
       "title": "Token usage",
@@ -686,7 +1195,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 8
+        "y": 23
       },
       "targets": [
         {
@@ -828,10 +1337,10 @@
       }
     },
     {
-      "id": 183,
+      "id": 196,
       "type": "timeseries",
-      "title": "Success rate",
-      "description": "Inference call success rate per interval.",
+      "title": "Tokens per call",
+      "description": "Mean input plus output tokens per inference call.",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
@@ -840,7 +1349,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 8
+        "y": 23
       },
       "targets": [
         {
@@ -848,12 +1357,456 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "100 * (1 - ((sum(increase(gen_ai_client_inference_duration_seconds_count{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", error_type!=\"\"}[$__rate_interval])) or vector(0)) / clamp_min(sum(increase(gen_ai_client_inference_duration_seconds_count{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__rate_interval])), 1)))",
+          "expr": "(((sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__rate_interval])) or sum(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__rate_interval]))) + (sum(increase(gen_ai_client_inference_usage_output_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__rate_interval])) or sum(increase(gen_ai_client_inference_operation_output_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__rate_interval]))))) / clamp_min(sum(increase(gen_ai_client_inference_duration_seconds_count{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__rate_interval])), 1)",
           "refId": "A",
           "instant": false,
           "range": true,
           "format": "time_series",
-          "legendFormat": "Success rate"
+          "legendFormat": "Tokens per call"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tokens per call"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#22D3EE",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 197,
+      "type": "table",
+      "title": "Top agents by tokens",
+      "description": "Top agents by input plus output tokens in the selected range.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 30
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "topk(5, ((sum by (gen_ai_agent_name)(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__range])) or sum by (gen_ai_agent_name)(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__range]))) + (sum by (gen_ai_agent_name)(increase(gen_ai_client_inference_usage_output_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__range])) or sum by (gen_ai_agent_name)(increase(gen_ai_client_inference_operation_output_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__range])))))",
+          "refId": "A",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum by (gen_ai_agent_name)(increase(gen_ai_client_inference_duration_seconds_count{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__range]))",
+          "refId": "B",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "gen_ai_agent_name",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "gen_ai_agent_name": "Agent",
+              "Value #A": "Tokens",
+              "Value #B": "Calls"
+            },
+            "indexByName": {
+              "gen_ai_agent_name": 0,
+              "Agent": 0,
+              "Value #A": 1,
+              "Tokens": 1,
+              "Value #B": 2,
+              "Calls": 2
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#2563EB",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Agent"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "left"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tokens"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#F59E0B"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Calls"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": [],
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Tokens",
+            "desc": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 198,
+      "type": "table",
+      "title": "Top applications by tokens",
+      "description": "Top applications by input plus output tokens in the selected range.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 30
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "topk(5, ((sum by (service_name)(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__range])) or sum by (service_name)(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__range]))) + (sum by (service_name)(increase(gen_ai_client_inference_usage_output_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__range])) or sum by (service_name)(increase(gen_ai_client_inference_operation_output_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__range])))))",
+          "refId": "A",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum by (service_name)(increase(gen_ai_client_inference_duration_seconds_count{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__range]))",
+          "refId": "B",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "service_name",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "service_name": "Application",
+              "Value #A": "Tokens",
+              "Value #B": "Calls"
+            },
+            "indexByName": {
+              "service_name": 0,
+              "Application": 0,
+              "Value #A": 1,
+              "Tokens": 1,
+              "Value #B": 2,
+              "Calls": 2
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#2563EB",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Application"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "left"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tokens"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#F59E0B"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Calls"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": [],
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Tokens",
+            "desc": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 183,
+      "type": "timeseries",
+      "title": "Cache hit rate",
+      "description": "Cache-read tokens divided by input tokens per interval.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 30
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "100 * sum(increase(gen_ai_client_inference_usage_cache_read_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__rate_interval])) / clamp_min((sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__rate_interval])) or sum(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__rate_interval]))), 1)",
+          "refId": "A",
+          "instant": false,
+          "range": true,
+          "format": "time_series",
+          "legendFormat": "Cache hit rate"
         }
       ],
       "fieldConfig": {
@@ -897,7 +1850,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Success rate"
+              "options": "Cache hit rate"
             },
             "properties": [
               {
@@ -928,23 +1881,379 @@
       }
     },
     {
-      "id": 110,
+      "id": 200,
+      "type": "table",
+      "title": "Model tokens",
+      "description": "Token breakdown per model: calls, input, output, cache read/write, cache hit rate and total.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum by (gen_ai_request_model)(increase(gen_ai_client_inference_duration_seconds_count{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range]))",
+          "refId": "A",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "(sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range])) or sum by (gen_ai_request_model)(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range])))",
+          "refId": "B",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "(sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range])) or sum by (gen_ai_request_model)(increase(gen_ai_client_inference_operation_output_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range])))",
+          "refId": "C",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_cache_read_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range]))",
+          "refId": "D",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_cache_write_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range]))",
+          "refId": "E",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "100 * ((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_cache_read_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range]))) or 0 * (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range])) or sum by (gen_ai_request_model)(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range])))) / clamp_min((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range])) or sum by (gen_ai_request_model)(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range]))), 1)",
+          "refId": "F",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range])) or sum by (gen_ai_request_model)(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range]))) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range])) or sum by (gen_ai_request_model)(increase(gen_ai_client_inference_operation_output_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__range]))))",
+          "refId": "G",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "gen_ai_request_model",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "gen_ai_request_model": "Model",
+              "Value #A": "Calls",
+              "Value #B": "Input",
+              "Value #C": "Output",
+              "Value #D": "Cache Read",
+              "Value #E": "Cache Write",
+              "Value #F": "Cache Hit",
+              "Value #G": "Total"
+            },
+            "indexByName": {
+              "gen_ai_request_model": 0,
+              "Model": 0,
+              "Value #A": 1,
+              "Calls": 1,
+              "Value #B": 2,
+              "Input": 2,
+              "Value #C": 3,
+              "Output": 3,
+              "Value #D": 4,
+              "Cache Read": 4,
+              "Value #E": 5,
+              "Cache Write": 5,
+              "Value #F": 6,
+              "Cache Hit": 6,
+              "Value #G": 7,
+              "Total": 7
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#2563EB",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Model"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "left"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Calls"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Input"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Output"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cache Read"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cache Write"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cache Hit"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "#334155",
+                      "value": null
+                    },
+                    {
+                      "color": "#10B981",
+                      "value": 0
+                    },
+                    {
+                      "color": "#F59E0B",
+                      "value": 50
+                    },
+                    {
+                      "color": "#22D3EE",
+                      "value": 90
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Total"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#F59E0B"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": [],
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Total",
+            "desc": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 210,
       "type": "row",
-      "title": "Token Usage",
+      "title": "Model Performance",
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 46
       },
       "panels": []
     },
     {
-      "id": 111,
+      "id": 211,
       "type": "stat",
-      "title": "Tokens",
-      "description": "Input plus output tokens. Last 24 hours vs previous 24 hours.",
+      "title": "Calls",
+      "description": "Inference calls. Last 24 hours vs previous 24 hours.",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
@@ -953,7 +2262,7 @@
         "h": 6,
         "w": 4,
         "x": 0,
-        "y": 16
+        "y": 47
       },
       "targets": [
         {
@@ -961,7 +2270,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "(sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))) + (sum(increase(gen_ai_client_inference_usage_output_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_output_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])))",
+          "expr": "sum(increase(gen_ai_client_inference_duration_seconds_count{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))",
           "refId": "A",
           "instant": false,
           "range": true,
@@ -982,7 +2291,7 @@
                 "value": null
               },
               {
-                "color": "#F59E0B",
+                "color": "#0EA5E9",
                 "value": 0
               }
             ]
@@ -1027,7 +2336,7 @@
         "h": 6,
         "w": 4,
         "x": 4,
-        "y": 16
+        "y": 47
       },
       "targets": [
         {
@@ -1110,7 +2419,7 @@
         "h": 6,
         "w": 4,
         "x": 8,
-        "y": 16
+        "y": 47
       },
       "targets": [
         {
@@ -1185,7 +2494,7 @@
         "h": 6,
         "w": 4,
         "x": 12,
-        "y": 16
+        "y": 47
       },
       "targets": [
         {
@@ -1260,7 +2569,7 @@
         "h": 6,
         "w": 4,
         "x": 16,
-        "y": 16
+        "y": 47
       },
       "targets": [
         {
@@ -1323,10 +2632,10 @@
       "hideTimeOverride": true
     },
     {
-      "id": 116,
+      "id": 212,
       "type": "stat",
-      "title": "Cache hit rate",
-      "description": "Cache-read tokens divided by input tokens. Last 24 hours vs previous 24 hours.",
+      "title": "P90 latency",
+      "description": "90th percentile inference duration. Last 24 hours vs previous 24 hours.",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
@@ -1335,7 +2644,7 @@
         "h": 6,
         "w": 4,
         "x": 20,
-        "y": 16
+        "y": 47
       },
       "targets": [
         {
@@ -1343,7 +2652,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "100 * sum(increase(gen_ai_client_inference_usage_cache_read_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) / clamp_min((sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))), 1) and ((sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))) > 0)",
+          "expr": "histogram_quantile(0.9, sum by (le)(increase(gen_ai_client_inference_duration_seconds_bucket{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))) and (sum(increase(gen_ai_client_inference_duration_seconds_count{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) > 0)",
           "refId": "A",
           "instant": false,
           "range": true,
@@ -1355,8 +2664,7 @@
           "color": {
             "mode": "thresholds"
           },
-          "unit": "percent",
-          "decimals": 1,
+          "unit": "s",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1365,11 +2673,12 @@
                 "value": null
               },
               {
-                "color": "#10B981",
+                "color": "#F59E0B",
                 "value": 0
               }
             ]
-          }
+          },
+          "decimals": 2
         },
         "overrides": []
       },
@@ -1378,7 +2687,7 @@
         "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
-        "percentChangeColorMode": "standard",
+        "percentChangeColorMode": "inverted",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -1410,7 +2719,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 23
+        "y": 54
       },
       "targets": [
         {
@@ -1474,7 +2783,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 23
+        "y": 54
       },
       "targets": [
         {
@@ -1601,7 +2910,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 23
+        "y": 54
       },
       "targets": [
         {
@@ -1685,7 +2994,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 30
+        "y": 61
       },
       "targets": [
         {
@@ -1785,7 +3094,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 30
+        "y": 61
       },
       "targets": [
         {
@@ -1885,7 +3194,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 30
+        "y": 61
       },
       "targets": [
         {
@@ -1985,7 +3294,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 37
+        "y": 68
       },
       "targets": [
         {
@@ -2308,7 +3617,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 46
+        "y": 77
       },
       "targets": [
         {
@@ -2673,7 +3982,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 55
+        "y": 87
       },
       "panels": []
     },
@@ -2690,7 +3999,7 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 56
+        "y": 88
       },
       "targets": [
         {
@@ -2764,7 +4073,7 @@
         "h": 6,
         "w": 6,
         "x": 6,
-        "y": 56
+        "y": 88
       },
       "targets": [
         {
@@ -2838,7 +4147,7 @@
         "h": 6,
         "w": 6,
         "x": 12,
-        "y": 56
+        "y": 88
       },
       "targets": [
         {
@@ -2913,7 +4222,7 @@
         "h": 6,
         "w": 6,
         "x": 18,
-        "y": 56
+        "y": 88
       },
       "targets": [
         {
@@ -2996,7 +4305,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 63
+        "y": 95
       },
       "targets": [
         {
@@ -3060,7 +4369,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 63
+        "y": 95
       },
       "targets": [
         {
@@ -3144,7 +4453,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 63
+        "y": 95
       },
       "targets": [
         {
@@ -3228,7 +4537,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 70
+        "y": 102
       },
       "targets": [
         {
@@ -3527,7 +4836,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 78
+        "y": 110
       },
       "targets": [
         {
@@ -3627,7 +4936,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 78
+        "y": 110
       },
       "targets": [
         {
@@ -3777,7 +5086,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 78
+        "y": 110
       },
       "targets": [
         {
@@ -3912,7 +5221,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 86
+        "y": 118
       },
       "panels": []
     },
@@ -3929,7 +5238,7 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 87
+        "y": 119
       },
       "targets": [
         {
@@ -4014,7 +5323,7 @@
         "h": 6,
         "w": 6,
         "x": 6,
-        "y": 87
+        "y": 119
       },
       "targets": [
         {
@@ -4099,7 +5408,7 @@
         "h": 6,
         "w": 6,
         "x": 12,
-        "y": 87
+        "y": 119
       },
       "targets": [
         {
@@ -4209,7 +5518,7 @@
         "h": 6,
         "w": 6,
         "x": 18,
-        "y": 87
+        "y": 119
       },
       "targets": [
         {
@@ -4300,7 +5609,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 93
+        "y": 125
       },
       "targets": [
         {

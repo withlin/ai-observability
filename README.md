@@ -83,15 +83,18 @@ by this repository they default to the local `prometheus` and `tempo` UIDs.
 `ai-adoption.json` is the executive adoption view, organised in five rows:
 
 - **Overview**: distinct applications, agents, models and users, plus runs and
-  tokens. Applications are counted from standard telemetry, not an onboarding
-  registry: the value is the number of services that emitted GenAI metrics.
-- **Trends**: runs and errors, input/output/cache-read tokens, and success rate
-  over time.
-- **Token Usage**: tokens, success rate, mean latency, TTFT, TPOT, cache hit rate,
-  call distribution, call/error/latency trends, and model and agent performance
-  tables. Token totals use the usage counters with the operation token histograms
-  as a fallback, so they still render when an instrumentation emits only one of
-  the two standard signals.
+  tokens, and a workflow runs/errors trend. Applications are counted from
+  standard telemetry, not an onboarding registry: the value is the number of
+  services that emitted GenAI metrics.
+- **Token Usage**: total, input, output, cache-read and per-call tokens, cache hit
+  rate, tokens by model, token usage and per-call trends, top agents and
+  applications by tokens, and a per-model token table (calls, input, output,
+  cache read/write, cache hit rate, total). Token totals use the usage counters
+  with the operation token histograms as a fallback, so they still render when an
+  instrumentation emits only one of the two standard signals.
+- **Model Performance**: calls, success rate, mean latency, TTFT, TPOT and P90
+  latency, call distribution and volume, errors by type, latency trends, and
+  per-model and per-agent/application/model performance tables.
 - **Tool Calls**: tool counts, latency and error rate, call/error/latency trends,
   tool performance, tool error sources, and skill loads.
 - **Users**: distinct users and conversations, tokens and runs per user, and a
