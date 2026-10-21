@@ -1650,7 +1650,7 @@
         "cellHeight": "sm",
         "footer": {
           "countRows": false,
-          "fields": "",
+          "fields": [],
           "reducer": [
             "sum"
           ],
@@ -1959,7 +1959,7 @@
         "cellHeight": "sm",
         "footer": {
           "countRows": false,
-          "fields": "",
+          "fields": [],
           "reducer": [
             "sum"
           ],
@@ -2185,7 +2185,7 @@
         "cellHeight": "sm",
         "footer": {
           "countRows": false,
-          "fields": "",
+          "fields": [],
           "reducer": [
             "sum"
           ],
@@ -2310,7 +2310,7 @@
         "cellHeight": "sm",
         "footer": {
           "countRows": false,
-          "fields": "",
+          "fields": [],
           "reducer": [
             "sum"
           ],

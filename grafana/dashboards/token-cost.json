@@ -1350,7 +1350,11 @@
       "id": 42,
       "options": {
         "footer": {
-          "fields": "Value #A, Value #B, Value #C",
+          "fields": [
+            "Value #A",
+            "Value #B",
+            "Value #C"
+          ],
           "reducer": [
             "sum"
           ],
@@ -1780,7 +1784,11 @@
       "id": 51,
       "options": {
         "footer": {
-          "fields": "Value #A, Value #B, Value #C",
+          "fields": [
+            "Value #A",
+            "Value #B",
+            "Value #C"
+          ],
           "reducer": [
             "sum"
           ],
