@@ -121,19 +121,15 @@ speed from start latency.
 
 ### Cost is query-side
 
-`token-cost` derives cost from the cumulative token counters and an inline price
-table embedded in its PromQL (USD per 1M input/output tokens):
-
-| Model | Input | Output |
-|---|---|---|
-| `gemini-3.8-flash` | 0.3 | 2.5 |
-| `gpt-4o` | 2.5 | 10.0 |
-| `kimi-k3` | 3.0 | 15.0 |
+`token-cost` derives cost from the cumulative token counters and flat placeholder
+rates embedded in its PromQL (USD per 1M tokens): input `1.0`, output `3.0`.
+Every model present in the metrics is costed; no model names are hardcoded.
 
 This follows the standard's derived-signal definition: cost = token usage × unit
 price, computed at query time. It is not a telemetry metric and no local extension
-metric is created. Update the inline price vectors when models or prices change;
-unknown models contribute zero cost.
+metric is created. The flat rates are placeholders, not real prices; replace
+them with a per-model price catalog (for example, a metric generated from the
+gateway's model list) when accurate cost is required.
 
 ---
 
