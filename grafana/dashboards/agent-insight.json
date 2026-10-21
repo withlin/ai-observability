@@ -1827,115 +1827,29 @@
       "type": "row"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "description": "Agent and model relationships with p95 latency. A table is used instead of the nodeGraph panel for stability.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "filterable": true,
-            "inspect": false
-          },
-          "decimals": 3,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "#10B981",
-                "value": null
-              },
-              {
-                "color": "#F59E0B",
-                "value": 1
-              },
-              {
-                "color": "#DC2626",
-                "value": 5
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Source"
-            },
-            "properties": [
-              {
-                "id": "custom.align",
-                "value": "left"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Target"
-            },
-            "properties": [
-              {
-                "id": "custom.align",
-                "value": "left"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "p95 latency"
-            },
-            "properties": [
-              {
-                "id": "custom.align",
-                "value": "right"
-              },
-              {
-                "id": "unit",
-                "value": "s"
-              },
-              {
-                "id": "decimals",
-                "value": 3
-              }
-            ]
-          }
-        ]
-      },
+      "id": 121,
+      "type": "nodeGraph",
+      "title": "Request Topology",
+      "description": "Core entity topology: supervisor_agent -> agent -> model. Node and edge values are p95 latency.",
       "gridPos": {
         "h": 20,
         "w": 24,
         "x": 0,
         "y": 38
       },
-      "id": 121,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": [],
-          "reducer": [
-            "sum"
-          ],
-          "show": false
+        "nodes": {
+          "mainStatUnit": "s",
+          "secondaryStatUnit": "short",
+          "arcs": []
         },
-        "showHeader": true,
-        "sortBy": [
-          {
-            "displayName": "p95 latency",
-            "desc": true
-          }
-        ]
+        "edges": {
+          "mainStatUnit": "s"
+        }
       },
       "targets": [
         {
@@ -1943,39 +1857,40 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "max by (id, source, target)((label_join(label_replace(label_replace(histogram_quantile(0.95, sum by (le, gen_ai_agent_name)(increase(gen_ai_invoke_agent_duration_seconds_bucket{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"supervisor_agent\", gen_ai_agent_name!=\"\"}[$__range]))), \"source\", \"agent:supervisor_agent\", \"gen_ai_agent_name\", \".*\"), \"target\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"id\", \">\", \"source\", \"target\")) or (label_join(label_replace(label_replace(histogram_quantile(0.95, sum by (le, gen_ai_agent_name, gen_ai_request_model)(increase(gen_ai_client_inference_duration_seconds_bucket{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\"}[$__range]))), \"source\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"target\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\"), \"id\", \">\", \"source\", \"target\"))) >= 0",
-          "format": "table",
+          "expr": "max by (id, title, subtitle, color)(label_replace(label_replace(label_replace(label_replace(((histogram_quantile(0.95, sum by (le, gen_ai_agent_name)(increase(gen_ai_invoke_agent_duration_seconds_bucket{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"\"}[$__range])))) >= 0), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace(((histogram_quantile(0.95, sum by (le, gen_ai_request_model)(increase(gen_ai_client_inference_duration_seconds_bucket{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\"}[$__range])))) >= 0), \"id\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_request_model\", \"(.*)\"), \"subtitle\", \"Model\", \"gen_ai_request_model\", \".*\"), \"color\", \"#0D9488\", \"gen_ai_request_model\", \".*\") or label_replace(label_replace(label_replace(label_replace(((histogram_quantile(0.95, sum by (le, gen_ai_agent_name)(increase(gen_ai_client_inference_duration_seconds_bucket{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"}[$__range])))) >= 0), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"\"})), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(increase(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"\"}[$__range]))), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"})), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"}[$__range]))), \"id\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_agent_name\", \"(.*)\"), \"subtitle\", \"Agent\", \"gen_ai_agent_name\", \".*\"), \"color\", \"#7C3AED\", \"gen_ai_agent_name\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_request_model)(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\"})), \"id\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_request_model\", \"(.*)\"), \"subtitle\", \"Model\", \"gen_ai_request_model\", \".*\"), \"color\", \"#0D9488\", \"gen_ai_request_model\", \".*\") or label_replace(label_replace(label_replace(label_replace((0 * sum by (gen_ai_request_model)(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\"}[$__range]))), \"id\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\"), \"title\", \"$1\", \"gen_ai_request_model\", \"(.*)\"), \"subtitle\", \"Model\", \"gen_ai_request_model\", \".*\"), \"color\", \"#0D9488\", \"gen_ai_request_model\", \".*\") or label_replace(label_replace(label_replace(label_replace(vector(0), \"id\", \"agent:supervisor_agent\", \"\", \"\"), \"title\", \"supervisor_agent\", \"\", \"\"), \"subtitle\", \"Agent\", \"\", \"\"), \"color\", \"#7C3AED\", \"\", \"\"))",
           "instant": true,
           "range": false,
-          "refId": "A"
+          "format": "table",
+          "refId": "nodes"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "max by (id, source, target)(label_join(label_replace(label_replace(((histogram_quantile(0.95, sum by (le, gen_ai_agent_name)(increase(gen_ai_invoke_agent_duration_seconds_bucket{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"supervisor_agent\", gen_ai_agent_name!=\"\"}[$__range])))) >= 0), \"source\", \"agent:supervisor_agent\", \"gen_ai_agent_name\", \".*\"), \"target\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"id\", \">\", \"source\", \"target\") or label_join(label_replace(label_replace(((histogram_quantile(0.95, sum by (le, gen_ai_agent_name, gen_ai_request_model)(increase(gen_ai_client_inference_duration_seconds_bucket{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\"}[$__range])))) >= 0), \"source\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"target\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\"), \"id\", \">\", \"source\", \"target\") or label_join(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"supervisor_agent\", gen_ai_agent_name!=\"\"})), \"source\", \"agent:supervisor_agent\", \"gen_ai_agent_name\", \".*\"), \"target\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"id\", \">\", \"source\", \"target\") or label_join(label_replace(label_replace((0 * sum by (gen_ai_agent_name)(increase(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent|supervisor_agent\", gen_ai_agent_name!=\"supervisor_agent\", gen_ai_agent_name!=\"\"}[$__range]))), \"source\", \"agent:supervisor_agent\", \"gen_ai_agent_name\", \".*\"), \"target\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"id\", \">\", \"source\", \"target\") or label_join(label_replace(label_replace((0 * sum by (gen_ai_agent_name, gen_ai_request_model)(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\"})), \"source\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"target\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\"), \"id\", \">\", \"source\", \"target\") or label_join(label_replace(label_replace((0 * sum by (gen_ai_agent_name, gen_ai_request_model)(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_request_model=~\"$model\", gen_ai_request_model!=\"\"}[$__range]))), \"source\", \"agent:$1\", \"gen_ai_agent_name\", \"(.*)\"), \"target\", \"model:$1\", \"gen_ai_request_model\", \"(.*)\"), \"id\", \">\", \"source\", \"target\"))",
+          "instant": true,
+          "range": false,
+          "format": "table",
+          "refId": "edges"
         }
       ],
-      "title": "Request Topology",
       "transformations": [
         {
-          "id": "organize",
+          "id": "renameByRegex",
           "options": {
-            "excludeByName": {
-              "Time": true,
-              "id": true
-            },
-            "renameByName": {
-              "source": "Source",
-              "target": "Target",
-              "Value": "p95 latency"
-            },
-            "indexByName": {
-              "source": 0,
-              "Source": 0,
-              "target": 1,
-              "Target": 1,
-              "Value": 2,
-              "p95 latency": 2
-            }
+            "regex": "^Value.*",
+            "renamePattern": "p95 latency"
           }
         }
       ],
-      "type": "table"
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 2
+        },
+        "overrides": []
+      }
     },
     {
       "datasource": {

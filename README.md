@@ -109,9 +109,10 @@ The **Errors** row breaks errors down by operation, error type, and top bounded
 source labels (operation / agent / model / tool / error type). It never promotes
 conversation or user ids into a metric dimension.
 
-The **Request Topology** panel is a table of agent → model edges with p95
-latency. It replaces Grafana's nodeGraph panel, which crashed on graphs with
-missing or empty endpoints; tool calls live in the Tools row.
+The **Request Topology** panel is a node graph of supervisor → agent → model
+relationships with p95 latency. Nodes are also emitted from counter series as
+zero-value fallbacks so that every edge endpoint exists even when a histogram
+quantile is unavailable; tool calls live in the Tools row.
 
 Telemetry attribute names remain the standard `gen_ai.*` names; the dashboards
 use human-readable display labels (`Model:`, `Agent:`, `Tool:`, `Operation:`)
