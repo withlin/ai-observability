@@ -80,14 +80,18 @@ by this repository they default to the local `prometheus` and `tempo` UIDs.
 
 ### Adoption overview
 
-`ai-adoption.json` is the executive adoption view, organised in four rows:
+`ai-adoption.json` is the executive adoption view, organised in five rows:
 
 - **Overview**: distinct applications, agents, models and users, plus runs and
   tokens. Applications are counted from standard telemetry, not an onboarding
   registry: the value is the number of services that emitted GenAI metrics.
+- **Trends**: runs and errors, input/output/cache-read tokens, and success rate
+  over time.
 - **Token Usage**: tokens, success rate, mean latency, TTFT, TPOT, cache hit rate,
   call distribution, call/error/latency trends, and model and agent performance
-  tables.
+  tables. Token totals use the usage counters with the operation token histograms
+  as a fallback, so they still render when an instrumentation emits only one of
+  the two standard signals.
 - **Tool Calls**: tool counts, latency and error rate, call/error/latency trends,
   tool performance, tool error sources, and skill loads.
 - **Users**: distinct users and conversations, tokens and runs per user, and a

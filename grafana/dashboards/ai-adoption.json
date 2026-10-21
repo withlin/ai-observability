@@ -480,7 +480,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) + sum(increase(gen_ai_client_inference_usage_output_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))",
+          "expr": "(sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))) + (sum(increase(gen_ai_client_inference_usage_output_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_output_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])))",
           "refId": "A",
           "instant": false,
           "range": true,
@@ -534,6 +534,400 @@
       "hideTimeOverride": true
     },
     {
+      "id": 180,
+      "type": "row",
+      "title": "Trends",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "panels": []
+    },
+    {
+      "id": 181,
+      "type": "timeseries",
+      "title": "Runs and errors",
+      "description": "Workflow runs and failed runs per interval.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(increase(gen_ai_invoke_workflow_duration_seconds_count{deployment_environment=~\"$environment\", service_name=~\"$application\"}[$__rate_interval]))",
+          "refId": "A",
+          "instant": false,
+          "range": true,
+          "format": "time_series",
+          "legendFormat": "Runs"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(increase(gen_ai_invoke_workflow_duration_seconds_count{deployment_environment=~\"$environment\", service_name=~\"$application\", error_type!=\"\"}[$__rate_interval]))",
+          "refId": "B",
+          "instant": false,
+          "range": true,
+          "format": "time_series",
+          "legendFormat": "Errors"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Runs"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#0D9488",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Errors"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#F2495C",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 182,
+      "type": "timeseries",
+      "title": "Token usage",
+      "description": "Input, output and cache-read tokens per interval.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "(sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__rate_interval])) or sum(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__rate_interval])))",
+          "refId": "A",
+          "instant": false,
+          "range": true,
+          "format": "time_series",
+          "legendFormat": "Input tokens"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "(sum(increase(gen_ai_client_inference_usage_output_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__rate_interval])) or sum(increase(gen_ai_client_inference_operation_output_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__rate_interval])))",
+          "refId": "B",
+          "instant": false,
+          "range": true,
+          "format": "time_series",
+          "legendFormat": "Output tokens"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(increase(gen_ai_client_inference_usage_cache_read_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__rate_interval]))",
+          "refId": "C",
+          "instant": false,
+          "range": true,
+          "format": "time_series",
+          "legendFormat": "Cache read tokens"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Input tokens"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#DB2777",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Output tokens"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#F59E0B",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cache read tokens"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#22D3EE",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 183,
+      "type": "timeseries",
+      "title": "Success rate",
+      "description": "Inference call success rate per interval.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "100 * (1 - ((sum(increase(gen_ai_client_inference_duration_seconds_count{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", error_type!=\"\"}[$__rate_interval])) or vector(0)) / clamp_min(sum(increase(gen_ai_client_inference_duration_seconds_count{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[$__rate_interval])), 1)))",
+          "refId": "A",
+          "instant": false,
+          "range": true,
+          "format": "time_series",
+          "legendFormat": "Success rate"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "unit": "percent"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Success rate"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#10B981",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
       "id": 110,
       "type": "row",
       "title": "Token Usage",
@@ -542,7 +936,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 15
       },
       "panels": []
     },
@@ -559,7 +953,7 @@
         "h": 6,
         "w": 4,
         "x": 0,
-        "y": 8
+        "y": 16
       },
       "targets": [
         {
@@ -567,7 +961,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) + sum(increase(gen_ai_client_inference_usage_output_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))",
+          "expr": "(sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))) + (sum(increase(gen_ai_client_inference_usage_output_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_output_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])))",
           "refId": "A",
           "instant": false,
           "range": true,
@@ -633,7 +1027,7 @@
         "h": 6,
         "w": 4,
         "x": 4,
-        "y": 8
+        "y": 16
       },
       "targets": [
         {
@@ -716,7 +1110,7 @@
         "h": 6,
         "w": 4,
         "x": 8,
-        "y": 8
+        "y": 16
       },
       "targets": [
         {
@@ -791,7 +1185,7 @@
         "h": 6,
         "w": 4,
         "x": 12,
-        "y": 8
+        "y": 16
       },
       "targets": [
         {
@@ -866,7 +1260,7 @@
         "h": 6,
         "w": 4,
         "x": 16,
-        "y": 8
+        "y": 16
       },
       "targets": [
         {
@@ -941,7 +1335,7 @@
         "h": 6,
         "w": 4,
         "x": 20,
-        "y": 8
+        "y": 16
       },
       "targets": [
         {
@@ -949,7 +1343,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "100 * sum(increase(gen_ai_client_inference_usage_cache_read_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) / clamp_min(sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])), 1) and (sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) > 0)",
+          "expr": "100 * sum(increase(gen_ai_client_inference_usage_cache_read_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) / clamp_min((sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))), 1) and ((sum(increase(gen_ai_client_inference_usage_input_tokens_total{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h])) or sum(increase(gen_ai_client_inference_operation_input_tokens_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\"}[24h]))) > 0)",
           "refId": "A",
           "instant": false,
           "range": true,
@@ -1016,7 +1410,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 15
+        "y": 23
       },
       "targets": [
         {
@@ -1080,7 +1474,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 15
+        "y": 23
       },
       "targets": [
         {
@@ -1207,7 +1601,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 15
+        "y": 23
       },
       "targets": [
         {
@@ -1291,7 +1685,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 22
+        "y": 30
       },
       "targets": [
         {
@@ -1391,7 +1785,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 22
+        "y": 30
       },
       "targets": [
         {
@@ -1491,7 +1885,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 22
+        "y": 30
       },
       "targets": [
         {
@@ -1591,7 +1985,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 29
+        "y": 37
       },
       "targets": [
         {
@@ -1914,7 +2308,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 46
       },
       "targets": [
         {
@@ -2279,7 +2673,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 47
+        "y": 55
       },
       "panels": []
     },
@@ -2296,7 +2690,7 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 48
+        "y": 56
       },
       "targets": [
         {
@@ -2370,7 +2764,7 @@
         "h": 6,
         "w": 6,
         "x": 6,
-        "y": 48
+        "y": 56
       },
       "targets": [
         {
@@ -2444,7 +2838,7 @@
         "h": 6,
         "w": 6,
         "x": 12,
-        "y": 48
+        "y": 56
       },
       "targets": [
         {
@@ -2519,7 +2913,7 @@
         "h": 6,
         "w": 6,
         "x": 18,
-        "y": 48
+        "y": 56
       },
       "targets": [
         {
@@ -2602,7 +2996,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 55
+        "y": 63
       },
       "targets": [
         {
@@ -2666,7 +3060,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 55
+        "y": 63
       },
       "targets": [
         {
@@ -2750,7 +3144,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 55
+        "y": 63
       },
       "targets": [
         {
@@ -2822,106 +3216,6 @@
       }
     },
     {
-      "id": 156,
-      "type": "timeseries",
-      "title": "Tool latency",
-      "description": "Mean tool duration per interval.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 8,
-        "x": 0,
-        "y": 70
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "expr": "sum(rate(gen_ai_execute_tool_duration_seconds_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__rate_interval])) / clamp_min(sum(rate(gen_ai_execute_tool_duration_seconds_count{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__rate_interval])), 1)",
-          "refId": "A",
-          "instant": false,
-          "range": true,
-          "format": "time_series",
-          "legendFormat": "Avg tool latency"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "normal"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "unit": "s"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Avg tool latency"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "#F59E0B",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "options": {
-        "legend": {
-          "calcs": [
-            "lastNotNull",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      }
-    },
-    {
       "id": 154,
       "type": "table",
       "title": "Tool performance",
@@ -2934,7 +3228,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 62
+        "y": 70
       },
       "targets": [
         {
@@ -3221,6 +3515,106 @@
       }
     },
     {
+      "id": 156,
+      "type": "timeseries",
+      "title": "Tool latency",
+      "description": "Mean tool duration per interval.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 78
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "expr": "sum(rate(gen_ai_execute_tool_duration_seconds_sum{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__rate_interval])) / clamp_min(sum(rate(gen_ai_execute_tool_duration_seconds_count{deployment_environment=~\"$environment\", service_name=~\"$application\", gen_ai_agent_name=~\"$agent\"}[$__rate_interval])), 1)",
+          "refId": "A",
+          "instant": false,
+          "range": true,
+          "format": "time_series",
+          "legendFormat": "Avg tool latency"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "unit": "s"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Avg tool latency"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#F59E0B",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
       "id": 155,
       "type": "table",
       "title": "Tool errors",
@@ -3233,7 +3627,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 70
+        "y": 78
       },
       "targets": [
         {
@@ -3383,7 +3777,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 70
+        "y": 78
       },
       "targets": [
         {
@@ -3518,7 +3912,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 78
+        "y": 86
       },
       "panels": []
     },
@@ -3535,7 +3929,7 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 79
+        "y": 87
       },
       "targets": [
         {
@@ -3620,7 +4014,7 @@
         "h": 6,
         "w": 6,
         "x": 6,
-        "y": 79
+        "y": 87
       },
       "targets": [
         {
@@ -3705,7 +4099,7 @@
         "h": 6,
         "w": 6,
         "x": 12,
-        "y": 79
+        "y": 87
       },
       "targets": [
         {
@@ -3815,7 +4209,7 @@
         "h": 6,
         "w": 6,
         "x": 18,
-        "y": 79
+        "y": 87
       },
       "targets": [
         {
@@ -3906,7 +4300,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 85
+        "y": 93
       },
       "targets": [
         {
