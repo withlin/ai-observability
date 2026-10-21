@@ -16,8 +16,8 @@ LangGraph agent --OTLP--> OTel Collector --> Tempo (traces) + Prometheus (metric
 |---|---|---|
 | LangGraph app | OTLP/HTTP `localhost:4318` (HTTPS for remote collectors) | spans and metrics |
 | OTel Collector | receiver `:4318` (HTTP; `:4317` gRPC also enabled); trace exporter `tempo:4317`; metrics exporter `:8889`; self-metrics `:8888` | batches and routes |
-| Tempo | OTLP ingest `tempo:4317` (internal); HTTP API `:3200` | traces; span metrics remote-written to Prometheus |
-| Prometheus | host `:9091` | scrapes `otel-collector:8889` and receives Tempo span metrics |
+| Tempo | OTLP ingest `tempo:4317` (internal); HTTP API `:3200` | traces (TraceQL search and read) |
+| Prometheus | host `:9091` | scrapes `otel-collector:8889` (app-emitted metrics) |
 | Grafana | `:3000` | Tempo + Prometheus datasources |
 
 The app never talks to Tempo or Prometheus directly. Tempo's OTLP port is not
@@ -57,32 +57,35 @@ memory service, and graph. Tests construct it with in-memory exporters.
 
 | UID | Title | File | Purpose |
 |-----|-------|------|---------|
-| `agent-insight` | Agent Insight | `agent-insight.json` | Errors (by operation, type, and bounded source), the trace-derived Conversations card, Run volume, the Trajectory table, the Percentiles row (p95/p99), and the Scenarios row (skills, retrieval, memory). |
+| `agent-insight` | Agent Insight | `agent-insight.json` | Errors (by operation, type, and bounded source), the trace-derived Conversations card, Run volume, the Trajectory table, the Percentiles row (p95/p99), and the Scenarios row (skill tools, retrieval, memory). |
 | `token-cost` | Token & Cost | `token-cost.json` | Cost KPIs, spend trends, and cost by model / agent. Cost is derived in the dashboard from tokens × prices; there is no cost metric. |
 
 Both dashboards share the `application` → `agent` → `model` cascade.
 
 ### Importing into another Grafana
 
-`agent-insight.json` declares two datasource inputs. Import it via
-**Dashboards → New → Import** and select the Prometheus (metrics) and Tempo
-(tracing) data sources; panels and query variables bind to the selected UIDs.
-They are hidden template variables, so they add no controls to the dashboard.
-When provisioned by this repository they default to the local `prometheus` and
-`tempo` UIDs.
+Both dashboards declare datasource inputs. Import a JSON via
+**Dashboards → New → Import** and select the data sources:
 
-`token-cost.json` targets the provisioned `prometheus` UID directly.
+| Dashboard | Inputs |
+|---|---|
+| `agent-insight.json` | Prometheus (metrics) and Tempo (tracing) |
+| `token-cost.json` | Prometheus (metrics) |
+
+Panels and query variables bind to the selected UIDs. The inputs are hidden
+template variables, so they add no controls to the dashboard. When provisioned
+by this repository they default to the local `prometheus` and `tempo` UIDs.
 
 ### Conversations and users are trace-only
 
 `gen_ai.conversation.id` and `enduser.id` are unbounded identifiers. Per standard
-R-11.1-01 / R-8.3-02 they **never enter metric dimensions**, including Tempo
-span-metrics. The Conversations KPI card reads workflow spans with TraceQL and
-counts distinct conversations without a metric dimension.
+R-11.1-01 / R-8.3-02 they **never enter metric dimensions**. The Conversations
+KPI card reads workflow spans with
+TraceQL and counts distinct conversations without a metric dimension.
 
 The **Activity over time** panel uses bounded run/chat/tool counts, and
 **Run volume** shows workflow runs by success/error status. `gen_ai.conversation.id`
-and `enduser.id` are not Tempo span-metric dimensions; the Trajectory table and
+and `enduser.id` are not metric dimensions; the Trajectory table and
 the Conversations KPI card remain trace-only. Tempo 2.4.1 has no TraceQL metrics
 endpoint, so a distinct-conversation time series is intentionally not offered;
 use the card and the trace table for conversation drill-down.
@@ -106,8 +109,9 @@ and never expose the raw attribute key as a visible column or legend.
 
 The Percentiles row charts p95 and p99 for inference, agent, tool, TTFT, and
 retrieval/memory operations. Inference, agent, and TTFT use the app-emitted
-histograms; tool and scenario percentiles use Tempo span-metric latency so short
-demo runs still render. Use the model/agent filters to isolate the relevant
+histograms; tool percentiles use `gen_ai.execute_tool.duration` and scenario
+percentiles use `gen_ai.client.operation.duration`, so short demo runs still
+render. Use the model/agent filters to isolate the relevant
 lines.
 
 The **Models** row also charts **TPOT** (time per output token), derived
@@ -225,6 +229,8 @@ not used for inference. On failure, duration metrics carry `error.type` and the
 per-operation token histograms are recorded with value 0.
 
 There are **no local extension metrics** in this reference implementation.
+Dashboards read only the standard instruments above; skill names and data
+source ids stay in spans rather than becoming metric labels.
 
 ## Attributes
 
@@ -362,18 +368,13 @@ Ports: Grafana `:3000`, Prometheus `:9091`, Tempo `:3200`, OTLP/HTTP `:4318`
 (the app's exporter), OTLP/gRPC `:4317` (available but unused by the app), and
 Collector self-metrics `:8888`.
 
-### Tempo dimensions
+### Metric dimensions
 
-The span-metrics generator promotes bounded dimensions only:
-
-`gen_ai.operation.name`, `gen_ai.request.model`, `gen_ai.provider.name`,
-`gen_ai.tool.name`, `gen_ai.agent.name`, `gen_ai.workflow.name`,
-`gen_ai.skill.name`, `gen_ai.skill.resource.name`, `gen_ai.data_source.id`,
-`gen_ai.memory.store.id`, `error.type`.
-
-Changing the list requires a **Tempo restart** (`docker compose restart tempo`).
-`gen_ai.conversation.id`, `enduser.id` and `gen_ai.tool.call.id` are deliberately
-absent.
+The dashboards use only the standard metric dimensions. Skill names and data
+source ids are span-only refinements; the Skills row groups skill tool calls by
+`gen_ai.tool.name`, and Retrieval calls shows the standard operation total. The
+local Tempo instance serves traces only and does not derive span metrics or
+service graphs.
 
 ### Notes
 

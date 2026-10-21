@@ -33,7 +33,7 @@
       }
     ]
   },
-  "description": "Agent Insight. Runs and steps come from standard span metrics; conversations and users are read from traces because high-cardinality ids must not enter metric dimensions (R-11.1-01). Content columns require OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true.",
+  "description": "Agent Insight. Runs and steps come from standard duration metrics; conversations and users are read from traces because high-cardinality ids must not enter metric dimensions (R-11.1-01). Content columns require OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -111,7 +111,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_operation_name=\"invoke_workflow\"}[$__range]))",
+          "expr": "sum(increase(gen_ai_invoke_workflow_duration_seconds_count{service_name=~\"$application\"}[$__range]))",
           "format": null,
           "interval": "10s",
           "legendFormat": "now",
@@ -181,7 +181,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", gen_ai_operation_name=~\"chat|execute_tool\"}[$__range]))",
+          "expr": "(sum(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) or vector(0)) + (sum(increase(gen_ai_execute_tool_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"}[$__range])) or vector(0))",
           "format": null,
           "interval": "10s",
           "legendFormat": "now",
@@ -428,7 +428,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 58
       },
       "id": 414,
       "title": "Errors",
@@ -439,7 +439,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "Error-spans divided by all spans per operation. Application-wide and bounded by operation name.",
+      "description": "Failed operations divided by all operations, by operation name. Bounded labels only.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -494,7 +494,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 8
+        "y": 59
       },
       "id": 415,
       "maxDataPoints": 2000,
@@ -521,7 +521,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "100 * sum by (gen_ai_operation_name)(increase(traces_spanmetrics_calls_total{service=~\"$application\", error_type!=\"\"}[$__rate_interval])) / clamp_min(sum by (gen_ai_operation_name)(increase(traces_spanmetrics_calls_total{service=~\"$application\"}[$__rate_interval])), 0.0001)",
+          "expr": "100 * sum by (gen_ai_operation_name)(label_replace(increase(gen_ai_invoke_workflow_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__rate_interval]), \"gen_ai_operation_name\", \"invoke_workflow\", \"\", \"\") or label_replace(increase(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__rate_interval]), \"gen_ai_operation_name\", \"invoke_agent\", \"\", \"\") or label_replace(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__rate_interval]), \"gen_ai_operation_name\", \"chat\", \"\", \"\") or label_replace(increase(gen_ai_execute_tool_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__rate_interval]), \"gen_ai_operation_name\", \"execute_tool\", \"\", \"\") or increase(gen_ai_client_operation_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__rate_interval])) / clamp_min(sum by (gen_ai_operation_name)(label_replace(increase(gen_ai_invoke_workflow_duration_seconds_count{service_name=~\"$application\"}[$__rate_interval]), \"gen_ai_operation_name\", \"invoke_workflow\", \"\", \"\") or label_replace(increase(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\"}[$__rate_interval]), \"gen_ai_operation_name\", \"invoke_agent\", \"\", \"\") or label_replace(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\"}[$__rate_interval]), \"gen_ai_operation_name\", \"chat\", \"\", \"\") or label_replace(increase(gen_ai_execute_tool_duration_seconds_count{service_name=~\"$application\"}[$__rate_interval]), \"gen_ai_operation_name\", \"execute_tool\", \"\", \"\") or increase(gen_ai_client_operation_duration_seconds_count{service_name=~\"$application\"}[$__rate_interval])), 0.0001)",
           "format": "time_series",
           "interval": "10s",
           "legendFormat": "Operation: {{gen_ai_operation_name}}",
@@ -536,7 +536,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "Error spans grouped by error.type. No data means no errors in the window.",
+      "description": "Failed operations grouped by error.type. No data means no errors in the window.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -591,7 +591,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 8
+        "y": 59
       },
       "id": 416,
       "maxDataPoints": 2000,
@@ -618,7 +618,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (error_type)(increase(traces_spanmetrics_calls_total{service=~\"$application\", error_type!=\"\"}[$__rate_interval]))",
+          "expr": "sum by (error_type)(increase(gen_ai_invoke_workflow_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__rate_interval]) or increase(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__rate_interval]) or increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__rate_interval]) or increase(gen_ai_execute_tool_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__rate_interval]) or increase(gen_ai_client_operation_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__rate_interval]))",
           "format": "time_series",
           "interval": "10s",
           "legendFormat": "{{error_type}}",
@@ -678,7 +678,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 8
+        "y": 59
       },
       "id": 417,
       "options": {
@@ -698,7 +698,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum by (gen_ai_operation_name, gen_ai_agent_name, gen_ai_request_model, gen_ai_tool_name, error_type)(increase(traces_spanmetrics_calls_total{service=~\"$application\", error_type!=\"\"}[$__range]))",
+          "expr": "sum by (gen_ai_operation_name, gen_ai_agent_name, gen_ai_request_model, gen_ai_tool_name, error_type)(label_replace(increase(gen_ai_invoke_workflow_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__range]), \"gen_ai_operation_name\", \"invoke_workflow\", \"\", \"\") or label_replace(increase(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__range]), \"gen_ai_operation_name\", \"invoke_agent\", \"\", \"\") or label_replace(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__range]), \"gen_ai_operation_name\", \"chat\", \"\", \"\") or label_replace(increase(gen_ai_execute_tool_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__range]), \"gen_ai_operation_name\", \"execute_tool\", \"\", \"\") or increase(gen_ai_client_operation_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__range]))",
           "format": "table",
           "instant": true,
           "range": false,
@@ -732,7 +732,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 7
       },
       "id": 43,
       "title": "Trends",
@@ -830,7 +830,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 16
+        "y": 8
       },
       "id": 21,
       "maxDataPoints": 2000,
@@ -856,7 +856,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_operation_name=\"invoke_workflow\"}[$__rate_interval]))",
+          "expr": "sum(increase(gen_ai_invoke_workflow_duration_seconds_count{service_name=~\"$application\"}[$__rate_interval]))",
           "format": "time_series",
           "interval": "10s",
           "legendFormat": "Runs",
@@ -867,7 +867,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_operation_name=\"chat\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"}[$__rate_interval]))",
+          "expr": "sum(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval]))",
           "format": "time_series",
           "interval": "10s",
           "legendFormat": "Chat calls",
@@ -878,7 +878,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_operation_name=\"execute_tool\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"}[$__rate_interval]))",
+          "expr": "sum(increase(gen_ai_execute_tool_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"}[$__rate_interval]))",
           "format": "time_series",
           "interval": "10s",
           "legendFormat": "Tool calls",
@@ -961,7 +961,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 16
+        "y": 8
       },
       "id": 22,
       "maxDataPoints": 2000,
@@ -1014,7 +1014,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 23
       },
       "id": 46,
       "title": "Trajectory",
@@ -1665,7 +1665,7 @@
         "h": 13,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 24
       },
       "id": 32,
       "options": {
@@ -1802,7 +1802,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 45
+        "y": 37
       },
       "id": 120,
       "title": "How a request flows",
@@ -1816,7 +1816,7 @@
         "h": 20,
         "w": 24,
         "x": 0,
-        "y": 46
+        "y": 38
       },
       "datasource": {
         "type": "prometheus",
@@ -2407,7 +2407,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "Error spans per agent. Any non-zero line is worth a look - this is the 'is it broken' panel.",
+      "description": "Failed agent invocations per agent. Any non-zero line is worth a look - this is the 'is it broken' panel.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2555,7 +2555,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (gen_ai_agent_name)(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", status_code=\"STATUS_CODE_ERROR\"}[$__rate_interval]))",
+          "expr": "sum by (gen_ai_agent_name)(increase(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\", error_type!=\"\"}[$__rate_interval]))",
           "format": "time_series",
           "interval": "10s",
           "legendFormat": "Agent: {{gen_ai_agent_name}} errors",
@@ -2896,7 +2896,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "Failed workflow spans divided by all workflow spans. When it rises, inspect the agent and tool error panels for the first failing step.",
+      "description": "Failed workflow invocations divided by all workflow invocations. When it rises, inspect the agent and tool error panels for the first failing step.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -2959,7 +2959,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "clamp_max(100 * (sum(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_operation_name=\"invoke_workflow\", error_type!=\"\"}[$__range])) or vector(0)) / clamp_min(sum(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_operation_name=\"invoke_workflow\"}[$__range])), 1), 100)",
+          "expr": "clamp_max(100 * (sum(increase(gen_ai_invoke_workflow_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__range])) or vector(0)) / clamp_min(sum(increase(gen_ai_invoke_workflow_duration_seconds_count{service_name=~\"$application\"}[$__range])), 1), 100)",
           "format": null,
           "interval": "10s",
           "legendFormat": "now",
@@ -3073,7 +3073,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 23
+        "y": 15
       },
       "id": 20,
       "maxDataPoints": 2000,
@@ -4306,7 +4306,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 23
+        "y": 15
       },
       "id": 200,
       "maxDataPoints": 2000,
@@ -4333,7 +4333,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_operation_name=\"invoke_workflow\", error_type=\"\"}[$__rate_interval]))",
+          "expr": "sum(increase(gen_ai_invoke_workflow_duration_seconds_count{service_name=~\"$application\", error_type=\"\"}[$__rate_interval]))",
           "format": "time_series",
           "interval": "10s",
           "legendFormat": "Success",
@@ -4345,7 +4345,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_operation_name=\"invoke_workflow\", error_type!=\"\"}[$__rate_interval]))",
+          "expr": "sum(increase(gen_ai_invoke_workflow_duration_seconds_count{service_name=~\"$application\", error_type!=\"\"}[$__rate_interval]))",
           "format": "time_series",
           "interval": "10s",
           "legendFormat": "Error",
@@ -4520,7 +4520,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(sum by (gen_ai_operation_name)(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_operation_name!=\"\"}[$__rate_interval])), \"operation\", \"$1\", \"gen_ai_operation_name\", \"(.*)\"), \"operation\", \"Workflow\", \"gen_ai_operation_name\", \"invoke_workflow\"), \"operation\", \"Agent\", \"gen_ai_operation_name\", \"invoke_agent\"), \"operation\", \"Model call\", \"gen_ai_operation_name\", \"chat\"), \"operation\", \"Tool\", \"gen_ai_operation_name\", \"execute_tool\"), \"operation\", \"Retrieval\", \"gen_ai_operation_name\", \"retrieval\"), \"operation\", \"Memory search\", \"gen_ai_operation_name\", \"search_memory\"), \"operation\", \"Memory write\", \"gen_ai_operation_name\", \"create_memory\"), \"operation\", \"Memory update\", \"gen_ai_operation_name\", \"update_memory\"), \"operation\", \"Memory upsert\", \"gen_ai_operation_name\", \"upsert_memory\"), \"operation\", \"Memory delete\", \"gen_ai_operation_name\", \"delete_memory\")",
+          "expr": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(sum by (gen_ai_operation_name)(label_replace(increase(gen_ai_invoke_workflow_duration_seconds_count{service_name=~\"$application\"}[$__rate_interval]), \"gen_ai_operation_name\", \"invoke_workflow\", \"\", \"\") or label_replace(increase(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\"}[$__rate_interval]), \"gen_ai_operation_name\", \"invoke_agent\", \"\", \"\") or label_replace(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\"}[$__rate_interval]), \"gen_ai_operation_name\", \"chat\", \"\", \"\") or label_replace(increase(gen_ai_execute_tool_duration_seconds_count{service_name=~\"$application\"}[$__rate_interval]), \"gen_ai_operation_name\", \"execute_tool\", \"\", \"\") or increase(gen_ai_client_operation_duration_seconds_count{service_name=~\"$application\"}[$__rate_interval])), \"operation\", \"$1\", \"gen_ai_operation_name\", \"(.*)\"), \"operation\", \"Workflow\", \"gen_ai_operation_name\", \"invoke_workflow\"), \"operation\", \"Agent\", \"gen_ai_operation_name\", \"invoke_agent\"), \"operation\", \"Model call\", \"gen_ai_operation_name\", \"chat\"), \"operation\", \"Tool\", \"gen_ai_operation_name\", \"execute_tool\"), \"operation\", \"Retrieval\", \"gen_ai_operation_name\", \"retrieval\"), \"operation\", \"Memory search\", \"gen_ai_operation_name\", \"search_memory\"), \"operation\", \"Memory write\", \"gen_ai_operation_name\", \"create_memory\"), \"operation\", \"Memory update\", \"gen_ai_operation_name\", \"update_memory\"), \"operation\", \"Memory upsert\", \"gen_ai_operation_name\", \"upsert_memory\"), \"operation\", \"Memory delete\", \"gen_ai_operation_name\", \"delete_memory\")",
           "legendFormat": "{{operation}}",
           "refId": "A"
         }
@@ -4533,7 +4533,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "Load/read/script tool calls by skill. Flat lines while policy questions arrive mean the model stopped using the skill.",
+      "description": "Load/read/script tool calls. Flat lines while policy questions arrive mean the model stopped using the skill.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -4681,12 +4681,12 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (gen_ai_skill_name, gen_ai_tool_name)(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_skill_name!=\"\"}[$__rate_interval]))",
-          "legendFormat": "Skill: {{gen_ai_skill_name}} \u00b7 Tool: {{gen_ai_tool_name}}",
+          "expr": "sum by (gen_ai_tool_name)(increase(gen_ai_execute_tool_duration_seconds_count{service_name=~\"$application\", gen_ai_tool_name=~\"load_skill|search_skill_resources|read_skill_resource|estimate_budget|run_skill_script\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"}[$__rate_interval]))",
+          "legendFormat": "Tool: {{gen_ai_tool_name}}",
           "refId": "A"
         }
       ],
-      "title": "Skill calls",
+      "title": "Skill tool calls",
       "type": "timeseries"
     },
     {
@@ -4842,8 +4842,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "histogram_quantile(0.95, sum by (le, gen_ai_skill_name)(increase(traces_spanmetrics_latency_bucket{service=~\"$application\", gen_ai_skill_name!=\"\"}[$__rate_interval])))",
-          "legendFormat": "Skill: {{gen_ai_skill_name}} p95",
+          "expr": "histogram_quantile(0.95, sum by (le, gen_ai_tool_name)(increase(gen_ai_execute_tool_duration_seconds_bucket{service_name=~\"$application\", gen_ai_tool_name=~\"load_skill|search_skill_resources|read_skill_resource|estimate_budget|run_skill_script\", gen_ai_agent_name=~\"$agent\", gen_ai_agent_name!=\"\"}[$__rate_interval])))",
+          "legendFormat": "Tool: {{gen_ai_tool_name}} p95",
           "refId": "A"
         }
       ],
@@ -4855,7 +4855,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "Retrieval operations by data source. Zero calls while policy questions arrive means the model skipped retrieval.",
+      "description": "Retrieval operations. Zero calls while policy questions arrive means the model skipped retrieval.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -5003,8 +5003,8 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (gen_ai_data_source_id)(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_operation_name=\"retrieval\", gen_ai_data_source_id!=\"\"}[$__rate_interval]))",
-          "legendFormat": "Data source: {{gen_ai_data_source_id}}",
+          "expr": "sum(increase(gen_ai_client_operation_duration_seconds_count{service_name=~\"$application\", gen_ai_operation_name=\"retrieval\"}[$__rate_interval]))",
+          "legendFormat": "Retrieval",
           "refId": "A"
         }
       ],
@@ -5164,7 +5164,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(sum by (gen_ai_operation_name)(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_operation_name=~\"search_memory|create_memory|update_memory|upsert_memory|delete_memory\"}[$__rate_interval])), \"operation\", \"$1\", \"gen_ai_operation_name\", \"(.*)\"), \"operation\", \"Workflow\", \"gen_ai_operation_name\", \"invoke_workflow\"), \"operation\", \"Agent\", \"gen_ai_operation_name\", \"invoke_agent\"), \"operation\", \"Model call\", \"gen_ai_operation_name\", \"chat\"), \"operation\", \"Tool\", \"gen_ai_operation_name\", \"execute_tool\"), \"operation\", \"Retrieval\", \"gen_ai_operation_name\", \"retrieval\"), \"operation\", \"Memory search\", \"gen_ai_operation_name\", \"search_memory\"), \"operation\", \"Memory write\", \"gen_ai_operation_name\", \"create_memory\"), \"operation\", \"Memory update\", \"gen_ai_operation_name\", \"update_memory\"), \"operation\", \"Memory upsert\", \"gen_ai_operation_name\", \"upsert_memory\"), \"operation\", \"Memory delete\", \"gen_ai_operation_name\", \"delete_memory\")",
+          "expr": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(sum by (gen_ai_operation_name)(increase(gen_ai_client_operation_duration_seconds_count{service_name=~\"$application\", gen_ai_operation_name=~\"search_memory|create_memory|update_memory|upsert_memory|delete_memory\"}[$__rate_interval])), \"operation\", \"$1\", \"gen_ai_operation_name\", \"(.*)\"), \"operation\", \"Workflow\", \"gen_ai_operation_name\", \"invoke_workflow\"), \"operation\", \"Agent\", \"gen_ai_operation_name\", \"invoke_agent\"), \"operation\", \"Model call\", \"gen_ai_operation_name\", \"chat\"), \"operation\", \"Tool\", \"gen_ai_operation_name\", \"execute_tool\"), \"operation\", \"Retrieval\", \"gen_ai_operation_name\", \"retrieval\"), \"operation\", \"Memory search\", \"gen_ai_operation_name\", \"search_memory\"), \"operation\", \"Memory write\", \"gen_ai_operation_name\", \"create_memory\"), \"operation\", \"Memory update\", \"gen_ai_operation_name\", \"update_memory\"), \"operation\", \"Memory upsert\", \"gen_ai_operation_name\", \"upsert_memory\"), \"operation\", \"Memory delete\", \"gen_ai_operation_name\", \"delete_memory\")",
           "legendFormat": "{{operation}}",
           "refId": "A"
         }
@@ -5680,7 +5680,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "histogram_quantile(0.95, sum by (le, gen_ai_tool_name)(increase(traces_spanmetrics_latency_bucket{service=~\"$application\", gen_ai_operation_name=\"execute_tool\", gen_ai_tool_name!=\"\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.95, sum by (le, gen_ai_tool_name)(increase(gen_ai_execute_tool_duration_seconds_bucket{service_name=~\"$application\", gen_ai_tool_name!=\"\"}[$__rate_interval])))",
           "legendFormat": "Tool: {{gen_ai_tool_name}} p95",
           "refId": "A"
         },
@@ -5689,7 +5689,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "histogram_quantile(0.99, sum by (le, gen_ai_tool_name)(increase(traces_spanmetrics_latency_bucket{service=~\"$application\", gen_ai_operation_name=\"execute_tool\", gen_ai_tool_name!=\"\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.99, sum by (le, gen_ai_tool_name)(increase(gen_ai_execute_tool_duration_seconds_bucket{service_name=~\"$application\", gen_ai_tool_name!=\"\"}[$__rate_interval])))",
           "legendFormat": "Tool: {{gen_ai_tool_name}} p99",
           "refId": "B"
         }
@@ -6022,7 +6022,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(histogram_quantile(0.95, sum by (le, gen_ai_operation_name)(increase(traces_spanmetrics_latency_bucket{service=~\"$application\", gen_ai_operation_name=~\"retrieval|search_memory|create_memory\"}[$__rate_interval]))), \"operation\", \"$1\", \"gen_ai_operation_name\", \"(.*)\"), \"operation\", \"Workflow\", \"gen_ai_operation_name\", \"invoke_workflow\"), \"operation\", \"Agent\", \"gen_ai_operation_name\", \"invoke_agent\"), \"operation\", \"Model call\", \"gen_ai_operation_name\", \"chat\"), \"operation\", \"Tool\", \"gen_ai_operation_name\", \"execute_tool\"), \"operation\", \"Retrieval\", \"gen_ai_operation_name\", \"retrieval\"), \"operation\", \"Memory search\", \"gen_ai_operation_name\", \"search_memory\"), \"operation\", \"Memory write\", \"gen_ai_operation_name\", \"create_memory\"), \"operation\", \"Memory update\", \"gen_ai_operation_name\", \"update_memory\"), \"operation\", \"Memory upsert\", \"gen_ai_operation_name\", \"upsert_memory\"), \"operation\", \"Memory delete\", \"gen_ai_operation_name\", \"delete_memory\")",
+          "expr": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(histogram_quantile(0.95, sum by (le, gen_ai_operation_name)(increase(gen_ai_client_operation_duration_seconds_bucket{service_name=~\"$application\", gen_ai_operation_name=~\"retrieval|search_memory|create_memory\"}[$__rate_interval]))), \"operation\", \"$1\", \"gen_ai_operation_name\", \"(.*)\"), \"operation\", \"Workflow\", \"gen_ai_operation_name\", \"invoke_workflow\"), \"operation\", \"Agent\", \"gen_ai_operation_name\", \"invoke_agent\"), \"operation\", \"Model call\", \"gen_ai_operation_name\", \"chat\"), \"operation\", \"Tool\", \"gen_ai_operation_name\", \"execute_tool\"), \"operation\", \"Retrieval\", \"gen_ai_operation_name\", \"retrieval\"), \"operation\", \"Memory search\", \"gen_ai_operation_name\", \"search_memory\"), \"operation\", \"Memory write\", \"gen_ai_operation_name\", \"create_memory\"), \"operation\", \"Memory update\", \"gen_ai_operation_name\", \"update_memory\"), \"operation\", \"Memory upsert\", \"gen_ai_operation_name\", \"upsert_memory\"), \"operation\", \"Memory delete\", \"gen_ai_operation_name\", \"delete_memory\")",
           "legendFormat": "{{operation}} p95",
           "refId": "A"
         },
@@ -6031,7 +6031,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(histogram_quantile(0.99, sum by (le, gen_ai_operation_name)(increase(traces_spanmetrics_latency_bucket{service=~\"$application\", gen_ai_operation_name=~\"retrieval|search_memory|create_memory\"}[$__rate_interval]))), \"operation\", \"$1\", \"gen_ai_operation_name\", \"(.*)\"), \"operation\", \"Workflow\", \"gen_ai_operation_name\", \"invoke_workflow\"), \"operation\", \"Agent\", \"gen_ai_operation_name\", \"invoke_agent\"), \"operation\", \"Model call\", \"gen_ai_operation_name\", \"chat\"), \"operation\", \"Tool\", \"gen_ai_operation_name\", \"execute_tool\"), \"operation\", \"Retrieval\", \"gen_ai_operation_name\", \"retrieval\"), \"operation\", \"Memory search\", \"gen_ai_operation_name\", \"search_memory\"), \"operation\", \"Memory write\", \"gen_ai_operation_name\", \"create_memory\"), \"operation\", \"Memory update\", \"gen_ai_operation_name\", \"update_memory\"), \"operation\", \"Memory upsert\", \"gen_ai_operation_name\", \"upsert_memory\"), \"operation\", \"Memory delete\", \"gen_ai_operation_name\", \"delete_memory\")",
+          "expr": "label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(label_replace(histogram_quantile(0.99, sum by (le, gen_ai_operation_name)(increase(gen_ai_client_operation_duration_seconds_bucket{service_name=~\"$application\", gen_ai_operation_name=~\"retrieval|search_memory|create_memory\"}[$__rate_interval]))), \"operation\", \"$1\", \"gen_ai_operation_name\", \"(.*)\"), \"operation\", \"Workflow\", \"gen_ai_operation_name\", \"invoke_workflow\"), \"operation\", \"Agent\", \"gen_ai_operation_name\", \"invoke_agent\"), \"operation\", \"Model call\", \"gen_ai_operation_name\", \"chat\"), \"operation\", \"Tool\", \"gen_ai_operation_name\", \"execute_tool\"), \"operation\", \"Retrieval\", \"gen_ai_operation_name\", \"retrieval\"), \"operation\", \"Memory search\", \"gen_ai_operation_name\", \"search_memory\"), \"operation\", \"Memory write\", \"gen_ai_operation_name\", \"create_memory\"), \"operation\", \"Memory update\", \"gen_ai_operation_name\", \"update_memory\"), \"operation\", \"Memory upsert\", \"gen_ai_operation_name\", \"upsert_memory\"), \"operation\", \"Memory delete\", \"gen_ai_operation_name\", \"delete_memory\")",
           "legendFormat": "{{operation}} p99",
           "refId": "B"
         }
@@ -6105,7 +6105,7 @@
         "name": "application",
         "options": [],
         "query": {
-          "query": "label_values(traces_spanmetrics_calls_total, service)",
+          "query": "label_values(gen_ai_invoke_workflow_duration_seconds_count, service_name)",
           "refId": "A"
         },
         "refresh": 2,
@@ -6132,7 +6132,7 @@
         "name": "agent",
         "options": [],
         "query": {
-          "query": "label_values(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_agent_name!=\"\"}, gen_ai_agent_name)",
+          "query": "label_values(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name!=\"\"}, gen_ai_agent_name)",
           "refId": "A"
         },
         "refresh": 2,

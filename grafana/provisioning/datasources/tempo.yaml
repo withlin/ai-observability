@@ -12,10 +12,8 @@ datasources:
       httpMethod: GET
       nodeGraph:
         enabled: true
-      serviceMap:
-        datasourceUid: prometheus
       tracesToMetrics:
         datasourceUid: prometheus
         queries:
-          - name: Token usage by model
-            query: sum(rate(traces_spanmetrics_calls_total{$__tags}[5m]))
+          - name: Inference calls
+            query: sum(rate(gen_ai_client_inference_duration_seconds_count{$__tags}[5m]))

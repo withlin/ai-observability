@@ -1,4 +1,14 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -50,7 +60,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Estimated USD spend in the window (local pricing table). Arrow compares with the immediately preceding window of the same length.",
       "fieldConfig": {
@@ -105,7 +115,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "(sum((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6))) > 0",
           "format": null,
@@ -120,7 +130,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Average spend per hour across the window (burn rate).",
       "fieldConfig": {
@@ -175,7 +185,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "(sum((sum by (gen_ai_request_model)(rate(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(rate(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6)) * 3600) > 0",
           "format": null,
@@ -190,7 +200,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Current run rate extrapolated over 30 days - a budgeting signal, not a bill.",
       "fieldConfig": {
@@ -245,7 +255,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "(sum((sum by (gen_ai_request_model)(rate(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(rate(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6)) * 2592000) > 0",
           "format": null,
@@ -260,7 +270,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Total cost divided by the number of chat requests - unit economics.",
       "fieldConfig": {
@@ -315,9 +325,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "(sum((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6))) / clamp_min(sum(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\", gen_ai_operation_name=\"chat\"}[$__range])), 0.0001)",
+          "expr": "(sum((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6))) / clamp_min(sum(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])), 0.0001)",
           "format": null,
           "interval": "10s",
           "legendFormat": "now",
@@ -330,7 +340,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Input + output tokens in the window.",
       "fieldConfig": {
@@ -385,7 +395,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "((sum(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range]))) + (sum(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])))) > 0",
           "format": null,
@@ -400,7 +410,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Blended price per 1K tokens - the higher this is, the more expensive the traffic mix.",
       "fieldConfig": {
@@ -455,7 +465,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "(sum((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6))) / clamp_min((sum(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) + sum(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range]))) / 1000, 0.0001)",
           "format": null,
@@ -482,7 +492,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "USD spent per time bucket, stacked by model - shows which model drives spend.",
       "fieldConfig": {
@@ -537,7 +547,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "sum by (model)(label_replace((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\"))",
           "legendFormat": "{{model}}",
@@ -550,7 +560,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Instantaneous burn rate in USD per hour.",
       "fieldConfig": {
@@ -621,7 +631,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "sum((sum by (gen_ai_request_model)(rate(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(rate(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6)) * 3600",
           "legendFormat": "Cost / hour",
@@ -634,7 +644,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Average USD cost per chat request - efficiency trend.",
       "fieldConfig": {
@@ -705,9 +715,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "(sum((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6))) / clamp_min(sum(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\", gen_ai_operation_name=\"chat\"}[$__rate_interval])), 0.0001)",
+          "expr": "(sum((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6))) / clamp_min(sum(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])), 0.0001)",
           "legendFormat": "Cost / request",
           "refId": "A"
         }
@@ -730,7 +740,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Input and output tokens per bucket, stacked. Output tokens usually cost several times more than input, so the split matters for spend.",
       "fieldConfig": {
@@ -816,7 +826,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "sum(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval]))",
           "legendFormat": "Input tokens",
@@ -825,7 +835,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "sum(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval]))",
           "legendFormat": "Output tokens",
@@ -838,7 +848,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Blended USD price per 1K tokens - rises when pricier models or output-heavy traffic dominate.",
       "fieldConfig": {
@@ -909,7 +919,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "(sum((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6))) / clamp_min((sum(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval])) + sum(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__rate_interval]))) / 1000, 0.0001)",
           "legendFormat": "Cost / 1K tokens",
@@ -934,7 +944,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Share of total spend per model - the fastest read on what is driving the bill.",
       "fieldConfig": {
@@ -985,7 +995,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "sum by (model)(label_replace((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\"))",
           "refId": "A"
@@ -1006,7 +1016,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "One row per model; every metric is a gradient gauge over a 6-stop rainbow scale. Footer shows column totals.",
       "fieldConfig": {
@@ -1353,9 +1363,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (model)(label_replace(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\", gen_ai_operation_name=\"chat\"}[$__range]), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\"))",
+          "expr": "sum by (model)(label_replace(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range]), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\"))",
           "format": "table",
           "instant": true,
           "range": false,
@@ -1364,7 +1374,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "(sum by (model)(label_replace(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range]), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\"))) + (sum by (model)(label_replace(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range]), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\")))",
           "format": "table",
@@ -1375,7 +1385,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "sum by (model)(label_replace((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\"))",
           "format": "table",
@@ -1386,7 +1396,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "(sum by (model)(label_replace((sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\"))) / clamp_min((sum by (model)(label_replace(sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) + sum by (gen_ai_request_model)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])), \"model\", \"$1\", \"gen_ai_request_model\", \"(.+)\"))) / 1000, 0.0001)",
           "format": "table",
@@ -1436,7 +1446,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "One row per agent; every metric is a gradient gauge over a 6-stop rainbow scale. Footer shows column totals.",
       "fieldConfig": {
@@ -1783,9 +1793,9 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "sum by (agent)(label_replace(increase(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\", gen_ai_operation_name=\"chat\"}[$__range]), \"agent\", \"$1\", \"gen_ai_agent_name\", \"(.+)\"))",
+          "expr": "sum by (agent)(label_replace(increase(gen_ai_client_inference_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range]), \"agent\", \"$1\", \"gen_ai_agent_name\", \"(.+)\"))",
           "format": "table",
           "instant": true,
           "range": false,
@@ -1794,7 +1804,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "(sum by (agent)(label_replace(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range]), \"agent\", \"$1\", \"gen_ai_agent_name\", \"(.+)\"))) + (sum by (agent)(label_replace(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range]), \"agent\", \"$1\", \"gen_ai_agent_name\", \"(.+)\")))",
           "format": "table",
@@ -1805,7 +1815,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "sum by (agent)(label_replace((sum by (gen_ai_request_model, gen_ai_agent_name)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model, gen_ai_agent_name)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6), \"agent\", \"$1\", \"gen_ai_agent_name\", \"(.+)\"))",
           "format": "table",
@@ -1816,7 +1826,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "(sum by (agent)(label_replace((sum by (gen_ai_request_model, gen_ai_agent_name)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(0.3), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(2.5), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(3.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6) + (sum by (gen_ai_request_model, gen_ai_agent_name)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) * on (gen_ai_request_model) group_left() (label_replace(vector(2.5), \"gen_ai_request_model\", \"gemini-3.8-flash\", \"\", \"\") or label_replace(vector(10.0), \"gen_ai_request_model\", \"gpt-4o\", \"\", \"\") or label_replace(vector(15.0), \"gen_ai_request_model\", \"kimi-k3\", \"\", \"\")) / 1e6), \"agent\", \"$1\", \"gen_ai_agent_name\", \"(.+)\"))) / clamp_min((sum by (agent)(label_replace(sum by (gen_ai_request_model, gen_ai_agent_name)(increase(gen_ai_client_inference_usage_input_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])) + sum by (gen_ai_request_model, gen_ai_agent_name)(increase(gen_ai_client_inference_usage_output_tokens_total{service_name=~\"$application\", gen_ai_agent_name=~\"$agent\", gen_ai_request_model=~\"$model\", gen_ai_agent_name!=\"\"}[$__range])), \"agent\", \"$1\", \"gen_ai_agent_name\", \"(.+)\"))) / 1000, 0.0001)",
           "format": "table",
@@ -1865,6 +1875,24 @@
   "templating": {
     "list": [
       {
+        "current": {
+          "selected": true,
+          "text": "Prometheus",
+          "value": "prometheus"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": "Prometheus",
+        "multi": false,
+        "name": "DS_PROMETHEUS",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
         "allValue": ".*",
         "allowCustomValue": true,
         "current": {
@@ -1873,7 +1901,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "prometheus"
+          "uid": "${DS_PROMETHEUS}"
         },
         "hide": 0,
         "includeAll": true,
@@ -1882,7 +1910,7 @@
         "name": "application",
         "options": [],
         "query": {
-          "query": "label_values(traces_spanmetrics_calls_total, service)",
+          "query": "label_values(gen_ai_client_inference_duration_seconds_count, service_name)",
           "refId": "A"
         },
         "refresh": 2,
@@ -1900,7 +1928,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "prometheus"
+          "uid": "${DS_PROMETHEUS}"
         },
         "hide": 0,
         "includeAll": true,
@@ -1909,7 +1937,7 @@
         "name": "agent",
         "options": [],
         "query": {
-          "query": "label_values(traces_spanmetrics_calls_total{service=~\"$application\", gen_ai_agent_name!=\"\"}, gen_ai_agent_name)",
+          "query": "label_values(gen_ai_invoke_agent_duration_seconds_count{service_name=~\"$application\", gen_ai_agent_name!=\"\"}, gen_ai_agent_name)",
           "refId": "A"
         },
         "refresh": 2,
@@ -1927,7 +1955,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "prometheus"
+          "uid": "${DS_PROMETHEUS}"
         },
         "hide": 0,
         "includeAll": true,
